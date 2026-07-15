@@ -1,0 +1,2275 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>♡ MONEY DIARY ♡</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Zen+Maru+Gothic:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+  /* ===== ログイン画面 ===== */
+  #loginScreen {
+    position: fixed; inset: 0;
+    background: var(--cream);
+    background-image:
+      radial-gradient(circle at 10% 20%, var(--peach-soft) 0%, transparent 35%),
+      radial-gradient(circle at 90% 80%, var(--pink-soft) 0%, transparent 35%);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999;
+    flex-direction: column;
+    padding: 20px;
+    text-align: center;
+  }
+  #loginScreen .login-logo {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 34px;
+    margin-bottom: 6px;
+  }
+  #loginScreen .login-logo .heart { color: var(--red); font-style: normal; display: inline-block; animation: beat 1.4s infinite ease-in-out; }
+  #loginScreen .login-sub {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 32px;
+    letter-spacing: 0.05em;
+  }
+  #loginBtn {
+    background: white;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 14px 28px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow: 4px 4px 0 var(--pink);
+    display: flex; align-items: center; gap: 10px;
+  }
+  #loginBtn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--pink); }
+  #loginBtn img { width: 20px; height: 20px; }
+  #loginError {
+    margin-top: 20px;
+    color: var(--red);
+    font-size: 13px;
+    background: white;
+    border: 2px solid var(--red);
+    border-radius: 12px;
+    padding: 12px 16px;
+    max-width: 320px;
+    display: none;
+  }
+  #loginStatus {
+    margin-top: 20px;
+    color: var(--ink-soft);
+    font-size: 13px;
+    display: none;
+  }
+  #appRoot { display: none; }
+  #appRoot.ready { display: block; }
+  .sync-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1.5px solid var(--ink);
+    margin-right: 8px;
+    background: var(--peach-soft);
+    color: var(--ink-soft);
+    display: flex; align-items: center; gap: 5px;
+    white-space: nowrap;
+  }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-light); }
+  .sync-dot.synced { background: var(--accent, #5b6f4e); background: #7ea86f; }
+  .sync-dot.saving { background: var(--orange); animation: beat 0.8s infinite; }
+  .header-right { display: flex; align-items: center; }
+  #logoutBtn {
+    background: white;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    width: 34px; height: 34px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-left: 8px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --cream: #fdf2ec;
+    --peach-soft: #ffe4dc;
+    --peach: #ffd8d2;
+    --pink-soft: #fae3f3;
+    --pink: #f0c8e6;
+    --pink-deep: #ebc6f3;
+    --blue: #5a7df5;
+    --blue-bright: #41bcf5;
+    --orange: #ffaf78;
+    --red: #f42d23;
+    --ink: #2a1f3d;
+    --ink-soft: #6b5b7e;
+    --ink-light: #b5a4c7;
+    --line: #f3dde5;
+    --line-strong: #e8c7d8;
+  }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--cream);
+    background-image:
+      radial-gradient(circle at 10% 20%, var(--peach-soft) 0%, transparent 35%),
+      radial-gradient(circle at 90% 80%, var(--pink-soft) 0%, transparent 35%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'Zen Maru Gothic', -apple-system, "Hiragino Sans", sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+  }
+  .num { font-family: 'DM Mono', monospace; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+
+  header {
+    background-color: rgba(253, 242, 236, 0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 2px dashed var(--pink);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--ink);
+    font-style: italic;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .logo .heart {
+    color: var(--red);
+    font-style: normal;
+    animation: beat 1.4s infinite ease-in-out;
+    display: inline-block;
+  }
+  @keyframes beat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.18); }
+    50% { transform: scale(1); }
+  }
+  .logo .sub {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 10px;
+    color: var(--blue);
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    margin-left: 4px;
+    background: var(--pink-soft);
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+
+  .ym-picker {
+    display: flex; align-items: center; gap: 4px;
+    background: white;
+    padding: 4px 6px;
+    border-radius: 999px;
+    border: 2px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--pink);
+  }
+  .ym-picker button {
+    background: var(--pink-soft);
+    border: none;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    font-size: 16px;
+    color: var(--ink);
+    cursor: pointer;
+    font-weight: 700;
+    font-family: 'Fraunces', serif;
+  }
+  .ym-picker button:active { background: var(--pink); transform: scale(0.92); }
+  .ym-display {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    font-weight: 600;
+    min-width: 110px;
+    text-align: center;
+    color: var(--ink);
+    font-style: italic;
+  }
+
+  nav.tabs {
+    background-color: rgba(253, 242, 236, 0.88);
+    backdrop-filter: blur(8px);
+    display: flex;
+    overflow-x: auto;
+    padding: 14px 12px 10px;
+    position: sticky; top: 75px; z-index: 99;
+    scrollbar-width: none;
+    gap: 8px;
+  }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    background: white;
+    border: 2px solid var(--ink);
+    padding: 9px 16px;
+    font-size: 13px;
+    color: var(--ink);
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: 500;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+  .tab:active { transform: translate(2px, 2px); }
+  .tab.active {
+    background: var(--blue);
+    color: white;
+    font-weight: 700;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  main { padding: 20px; max-width: 1100px; margin: 0 auto; }
+  .view { display: none; }
+  .view.active { display: block; animation: popIn .35s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes popIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+  }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 17px;
+    color: var(--ink);
+    margin: 0 0 14px;
+    font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+  }
+  h2::before {
+    content: '✿';
+    color: var(--red);
+    font-size: 18px;
+    font-style: normal;
+  }
+
+  .card {
+    background: white;
+    border-radius: 20px;
+    padding: 22px;
+    margin-bottom: 16px;
+    border: 2px solid var(--ink);
+    box-shadow: 5px 5px 0 var(--pink);
+  }
+
+  .dash-hero {
+    background: var(--blue);
+    border: 2px solid var(--ink);
+    border-radius: 24px;
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 6px 6px 0 var(--ink);
+    position: relative;
+    overflow: hidden;
+    color: white;
+  }
+  .dash-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: var(--orange);
+    border-radius: 50% 40% 60% 30%;
+    opacity: 0.6;
+  }
+  .dash-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -50px; right: 40px;
+    width: 120px; height: 120px;
+    background: var(--pink);
+    border-radius: 60% 40% 30% 70%;
+    opacity: 0.5;
+  }
+  .dash-hero-content { position: relative; z-index: 1; }
+  .dash-hero-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    opacity: 0.9;
+    margin-bottom: 8px;
+  }
+  .dash-hero-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 38px;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .dash-hero-sub {
+    margin-top: 10px;
+    font-size: 13px;
+    opacity: 0.9;
+  }
+
+  .dash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .stat {
+    background: white;
+    border-radius: 18px;
+    padding: 18px;
+    border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+  .stat.income { background: var(--peach); }
+  .stat.expense { background: var(--pink); }
+  .stat.loan { background: white; }
+  .stat-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 12px;
+    color: var(--ink);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .stat-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .stat-value .yen { font-size: 13px; margin-left: 2px; opacity: 0.7; }
+  .stat-sub { font-size: 11px; color: var(--ink-soft); margin-top: 4px; font-weight: 500; }
+
+  .breakdown {
+    background: white;
+    border-radius: 20px;
+    padding: 22px;
+    border: 2px solid var(--ink);
+    box-shadow: 5px 5px 0 var(--pink);
+    margin-bottom: 16px;
+  }
+  .breakdown-row {
+    display: flex; align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--line-strong);
+  }
+  .breakdown-row:last-child { border-bottom: none; }
+  .breakdown-row .lbl {
+    width: 100px; font-size: 13px; color: var(--ink); font-weight: 600;
+  }
+  .breakdown-row .bar-wrap {
+    flex: 1; height: 12px;
+    background: var(--peach-soft);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 0 12px;
+    border: 1.5px solid var(--ink);
+  }
+  .breakdown-row .bar {
+    height: 100%;
+    border-right: 1.5px solid var(--ink);
+  }
+  .breakdown-row .val {
+    width: 110px; text-align: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 14px; font-weight: 500;
+  }
+
+  .input-row {
+    display: flex; gap: 8px; align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  input[type="text"], input[type="number"], input[type="date"], select, textarea {
+    flex: 1;
+    padding: 12px 14px;
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    background: white;
+    font-size: 15px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    color: var(--ink);
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    background: var(--peach-soft);
+  }
+  input[type="number"] { font-family: 'DM Mono', monospace; text-align: right; font-variant-numeric: tabular-nums; }
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.7;
+  }
+  label {
+    font-size: 11px;
+    color: var(--ink-soft);
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .btn {
+    background: var(--blue);
+    color: white;
+    border: 2px solid var(--ink);
+    padding: 11px 22px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
+  .btn-soft {
+    background: white;
+    color: var(--ink);
+    box-shadow: 3px 3px 0 var(--pink);
+  }
+  .btn-pink {
+    background: var(--pink);
+    color: var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .btn-orange { background: var(--orange); color: var(--ink); }
+  .btn-danger {
+    background: white;
+    color: var(--red);
+    border: 2px solid var(--red);
+    padding: 5px 12px;
+    font-size: 11px;
+    box-shadow: 2px 2px 0 var(--red);
+  }
+  .btn-detail {
+    background: var(--pink);
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    box-shadow: 2px 2px 0 var(--ink);
+    cursor: pointer;
+    font-family: 'Zen Maru Gothic', sans-serif;
+  }
+  .btn-detail:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
+  .btn-sm {
+    padding: 7px 14px;
+    font-size: 12px;
+  }
+
+  .entry-list { margin-top: 8px; }
+  .entry-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1.5px dashed var(--line-strong);
+  }
+  .entry-item:last-child { border-bottom: none; }
+  .entry-name {
+    flex: 1; font-size: 15px;
+    color: var(--ink); font-weight: 500;
+  }
+  .entry-amount {
+    width: 140px;
+    padding: 10px 12px;
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    font-family: 'DM Mono', monospace;
+    text-align: right;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    background: var(--peach-soft);
+    font-weight: 500;
+  }
+  .entry-amount:focus { outline: none; background: white; }
+
+  .total-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px;
+    margin-top: 8px;
+    background: var(--pink-soft);
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .total-row .name {
+    flex: 1;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .total-row .val {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 18px;
+  }
+
+  .empty {
+    text-align: center;
+    padding: 36px 20px;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+  .empty::before {
+    content: '🌷';
+    display: block;
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+  .empty-hint { font-size: 12px; margin-top: 8px; color: var(--ink-light); }
+
+  .master-section {
+    background: white;
+    border-radius: 20px;
+    padding: 22px;
+    border: 2px solid var(--ink);
+    box-shadow: 5px 5px 0 var(--pink);
+    margin-bottom: 16px;
+  }
+  .master-section h3 {
+    margin: 0 0 14px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 17px;
+    color: var(--ink);
+    font-weight: 600;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .master-section h3::before {
+    content: '';
+    width: 14px; height: 14px;
+    background: var(--orange);
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+    flex-shrink: 0;
+  }
+  .master-section.s2 h3::before { background: var(--blue-bright); }
+  .master-section.s3 h3::before { background: var(--pink); }
+  .master-section.s4 h3::before { background: var(--red); }
+  .master-section.s5 h3::before { background: var(--peach); }
+  .master-section.s6 h3::before { background: var(--ink); border-color: var(--ink); }
+
+  .master-list { margin-top: 12px; }
+  .master-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 0;
+    border-bottom: 1.5px dashed var(--line-strong);
+  }
+  .master-item:last-child { border-bottom: none; }
+  .master-item .name { flex: 1; font-size: 14px; font-weight: 500; }
+  .master-item .meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-right: 8px;
+    background: var(--peach-soft);
+    padding: 3px 8px;
+    border-radius: 8px;
+    border: 1.5px solid var(--line-strong);
+  }
+
+  .loan-card {
+    padding: 18px 16px;
+    margin-bottom: 14px;
+    background: var(--pink-soft);
+    border: 2px solid var(--ink);
+    border-radius: 16px;
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+  .loan-card:last-child { margin-bottom: 0; }
+  .loan-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 12px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .loan-name {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 17px;
+  }
+  .loan-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    background: white;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1.5px solid var(--ink);
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .loan-body {
+    display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+  }
+  .loan-meta {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .loan-meta-item {
+    background: white;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1.5px solid var(--line-strong);
+  }
+  .loan-progress {
+    margin-top: 12px;
+    height: 14px;
+    background: white;
+    border-radius: 7px;
+    overflow: hidden;
+    border: 2px solid var(--ink);
+  }
+  .loan-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue-bright), var(--blue));
+    border-radius: 5px;
+  }
+  .loan-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+  .loan-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .chart-wrap {
+    background: white;
+    border-radius: 20px;
+    padding: 22px;
+    border: 2px solid var(--ink);
+    box-shadow: 5px 5px 0 var(--pink);
+    margin-bottom: 16px;
+  }
+  .chart-wrap h2 { margin-bottom: 16px; }
+  #monthlyChart { width: 100%; height: 240px; }
+
+  .auto-tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 9px;
+    background: var(--orange);
+    color: var(--ink);
+    border-radius: 999px;
+    margin-left: 8px;
+    letter-spacing: 0.05em;
+    border: 1.5px solid var(--ink);
+    font-weight: 500;
+  }
+
+  /* ===== モーダル ===== */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(42, 31, 61, 0.5);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 200;
+    padding: 16px;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    width: 100%;
+    max-width: 380px;
+    border: 2px solid var(--ink);
+    box-shadow: 6px 6px 0 var(--pink);
+    animation: popIn .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .modal h3 {
+    margin: 0 0 12px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 19px;
+    font-weight: 700;
+  }
+  .modal p { color: var(--ink-soft); margin: 0; font-size: 14px; }
+  .modal-actions {
+    display: flex; gap: 10px; margin-top: 22px;
+  }
+  .modal-actions .btn { flex: 1; }
+
+  /* ===== 詳細モーダル（大）===== */
+  .modal-lg {
+    max-width: 720px;
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 24px;
+  }
+  .modal-lg h3 {
+    border-bottom: 2px dashed var(--pink);
+    padding-bottom: 12px;
+    margin-bottom: 18px;
+  }
+  .modal-section {
+    margin-bottom: 22px;
+  }
+  .modal-section-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--blue);
+    margin-bottom: 10px;
+    font-weight: 700;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .modal-section-title::before {
+    content: '◆';
+    color: var(--orange);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .form-grid > div { display: flex; flex-direction: column; }
+  .form-grid input, .form-grid select { padding: 10px 12px; font-size: 14px; }
+
+  .family-list { margin-top: 10px; }
+  .family-row {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 1.5fr auto;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+  }
+  .family-row input { padding: 8px 10px; font-size: 13px; }
+
+  /* ===== 手書きキャンバス ===== */
+  .draw-wrap {
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+    background-image:
+      linear-gradient(to right, var(--peach-soft) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--peach-soft) 1px, transparent 1px);
+    background-size: 24px 24px;
+    position: relative;
+  }
+  .draw-canvas {
+    display: block;
+    width: 100%;
+    height: 220px;
+    touch-action: none;
+    cursor: crosshair;
+  }
+  .draw-toolbar {
+    display: flex;
+    gap: 6px;
+    padding: 8px;
+    background: var(--peach-soft);
+    border-top: 2px solid var(--ink);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .color-btn {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+    cursor: pointer;
+    padding: 0;
+  }
+  .color-btn.active {
+    transform: scale(1.2);
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--ink);
+  }
+  .draw-divider { width: 1px; background: var(--ink); align-self: stretch; margin: 0 4px; }
+
+  /* ===== 支払履歴テーブル ===== */
+  .pay-history {
+    margin-top: 10px;
+    background: var(--cream);
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .pay-history-header, .pay-history-row {
+    display: grid;
+    grid-template-columns: 1.1fr 1.2fr 0.8fr 1.2fr auto;
+    gap: 6px;
+    padding: 8px 10px;
+    align-items: center;
+    font-size: 12px;
+  }
+  .pay-history-header {
+    background: var(--ink);
+    color: white;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 600;
+  }
+  .pay-history-row {
+    border-top: 1px dashed var(--line-strong);
+    background: white;
+  }
+  .pay-history-row .num { font-size: 12px; }
+  .pay-form {
+    display: grid;
+    grid-template-columns: 1.1fr 1.2fr 0.8fr 1.2fr auto;
+    gap: 6px;
+    padding: 8px 10px;
+    background: var(--pink-soft);
+    align-items: center;
+  }
+  .pay-form input { padding: 8px 10px; font-size: 13px; }
+  .pay-form .btn { padding: 8px 12px; font-size: 12px; }
+  .pay-history .empty {
+    padding: 18px; font-size: 12px; background: white;
+  }
+
+  /* ===== 月次メモエリア ===== */
+  .month-memo-card {
+    background: white;
+    border-radius: 20px;
+    padding: 22px;
+    border: 2px solid var(--ink);
+    box-shadow: 5px 5px 0 var(--pink);
+    margin-bottom: 16px;
+  }
+
+  /* ===== レスポンシブ ===== */
+  @media (min-width: 768px) {
+    main { padding: 28px; }
+    .dash-hero-value { font-size: 46px; }
+  }
+  @media (max-width: 480px) {
+    .dash-hero-value { font-size: 32px; }
+    .stat-value { font-size: 20px; }
+    header { padding: 14px; }
+    main { padding: 14px; }
+    .logo { font-size: 18px; }
+    .logo .sub { display: none; }
+    .ym-display { font-size: 14px; min-width: 90px; }
+    .tab { padding: 8px 13px; font-size: 12px; }
+    nav.tabs { top: 70px; }
+    .modal-lg { padding: 18px; }
+    .pay-history-header, .pay-history-row, .pay-form {
+      grid-template-columns: 1fr 1fr;
+      font-size: 11px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-logo"><span class="heart">♥</span> Money Diary</div>
+  <div class="login-sub">KEIEI NOTE ・ しほ専用</div>
+  <button id="loginBtn" onclick="doLogin()">
+    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.9 19 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 15.8 3 8.7 7.7 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.4 0 10.3-1.8 14.1-5l-6.5-5.5C29.6 36.2 26.9 37 24 37c-5.3 0-9.7-3.3-11.3-8l-6.6 5.1C9.5 40.5 16.2 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.5C39.9 37 44 31.1 44 24c0-1.4-.1-2.7-.4-3.5z"/></svg>
+    Googleでログイン
+  </button>
+  <div id="loginStatus">読み込み中...</div>
+  <div id="loginError"></div>
+</div>
+
+<div id="appRoot">
+
+<header>
+  <div class="logo">
+    <span class="heart">♥</span>
+    <span style="font-style: italic;">Money Diary</span>
+    <span class="sub">KEIEI</span>
+  </div>
+  <div class="header-right">
+    <div class="sync-badge"><span class="sync-dot" id="syncDot"></span><span id="syncLabel">-</span></div>
+    <div class="ym-picker">
+      <button onclick="changeMonth(-1)">‹</button>
+      <div class="ym-display" id="ymDisplay">2026.5</div>
+      <button onclick="changeMonth(1)">›</button>
+    </div>
+    <button id="logoutBtn" onclick="doLogout()" title="ログアウト">⏻</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-view="dashboard">✨ Home</button>
+  <button class="tab" data-view="sales">💖 売上</button>
+  <button class="tab" data-view="purchase">🌸 買掛</button>
+  <button class="tab" data-view="salary">🎀 給与</button>
+  <button class="tab" data-view="loan">🍊 融資</button>
+  <button class="tab" data-view="fixed">🫧 固定費</button>
+  <button class="tab" data-view="memo">📝 月次メモ</button>
+  <button class="tab" data-view="master">⚙ マスタ</button>
+</nav>
+
+<main>
+
+  <!-- Dashboard -->
+  <section class="view active" id="view-dashboard">
+    <div class="dash-hero">
+      <div class="dash-hero-content">
+        <div class="dash-hero-label">This Month's Profit ♡</div>
+        <div class="dash-hero-value" id="heroProfit">¥0</div>
+        <div class="dash-hero-sub" id="heroSub">入力してみよう</div>
+      </div>
+    </div>
+    <div class="dash-grid">
+      <div class="stat income">
+        <div class="stat-label">Sales / 売上</div>
+        <div class="stat-value num"><span id="dashSales">0</span><span class="yen">¥</span></div>
+        <div class="stat-sub" id="dashSalesSub">入力なし</div>
+      </div>
+      <div class="stat expense">
+        <div class="stat-label">Expense / 支出</div>
+        <div class="stat-value num"><span id="dashExpense">0</span><span class="yen">¥</span></div>
+        <div class="stat-sub">買掛+給与+固定費+返済</div>
+      </div>
+      <div class="stat loan">
+        <div class="stat-label">Loan / 融資残高</div>
+        <div class="stat-value num"><span id="dashLoan">0</span><span class="yen">¥</span></div>
+        <div class="stat-sub" id="dashLoanSub">残り</div>
+      </div>
+    </div>
+    <div class="breakdown">
+      <h2>支出の内訳</h2>
+      <div id="breakdownList"></div>
+    </div>
+    <div class="chart-wrap">
+      <h2>12ヶ月の推移</h2>
+      <canvas id="monthlyChart"></canvas>
+    </div>
+  </section>
+
+  <!-- Sales -->
+  <section class="view" id="view-sales">
+    <div class="card">
+      <h2 id="salesMonthLabel">今月の売上</h2>
+      <div id="salesList" class="entry-list"></div>
+      <div class="total-row"><div class="name">Total ♡</div><div class="val" id="salesTotal">¥0</div></div>
+    </div>
+  </section>
+
+  <!-- Purchase -->
+  <section class="view" id="view-purchase">
+    <div class="card">
+      <h2 id="purchaseMonthLabel">今月の買掛・支払</h2>
+      <div id="purchaseList" class="entry-list"></div>
+      <div class="total-row"><div class="name">Total ♡</div><div class="val" id="purchaseTotal">¥0</div></div>
+    </div>
+  </section>
+
+  <!-- Salary -->
+  <section class="view" id="view-salary">
+    <div class="card">
+      <h2 id="salaryMonthLabel">今月の給与</h2>
+      <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 14px;">✿ freeeで計算した金額を入れてね（👤マークで詳細プロフィール）</p>
+      <div id="salaryList" class="entry-list"></div>
+      <div class="total-row"><div class="name">Total ♡</div><div class="val" id="salaryTotal">¥0</div></div>
+    </div>
+  </section>
+
+  <!-- Loan -->
+  <section class="view" id="view-loan">
+    <div class="card">
+      <h2>融資一覧</h2>
+      <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 14px;">✿ 詳細ボタンで支払履歴・金利・メモ・手書きが残せます</p>
+      <div id="loanCardList"></div>
+    </div>
+  </section>
+
+  <!-- Fixed -->
+  <section class="view" id="view-fixed">
+    <div class="card">
+      <h2>固定費 <span class="auto-tag">AUTO ✨</span></h2>
+      <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px;">毎月自動で計上されます。詳細でメモと手書きが残せます。</p>
+      <div id="fixedList"></div>
+      <div class="total-row"><div class="name">月額合計 ♡</div><div class="val" id="fixedTotal">¥0</div></div>
+    </div>
+  </section>
+
+  <!-- Monthly Memo -->
+  <section class="view" id="view-memo">
+    <div class="month-memo-card">
+      <h2 id="memoMonthLabel">今月のメモ</h2>
+      <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 14px;">✿ 月ごとに自由にメモが残せます。年月切替で過去月も見れます。</p>
+      <label>テキストメモ</label>
+      <textarea id="memoText" placeholder="今月あったこと、覚えておきたいこと、来月への申し送りなど..." oninput="saveMemoText()"></textarea>
+      <div style="margin-top: 16px;">
+        <label>手書きメモ</label>
+        <div class="draw-wrap">
+          <canvas class="draw-canvas" id="memoCanvas"></canvas>
+          <div class="draw-toolbar" id="memoCanvasToolbar"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Master -->
+  <section class="view" id="view-master">
+    <div class="master-section s1">
+      <h3>得意先 / Customers</h3>
+      <div class="input-row">
+        <input type="text" id="newCustomer" placeholder="例：東京エレクトロン">
+        <button class="btn" onclick="addMaster('customers')">追加 +</button>
+      </div>
+      <div class="master-list" id="customerList"></div>
+    </div>
+
+    <div class="master-section s2">
+      <h3>仕入先・外注先 / Suppliers</h3>
+      <div class="input-row">
+        <input type="text" id="newSupplier" placeholder="例：◯◯鋼材">
+        <button class="btn" onclick="addMaster('suppliers')">追加 +</button>
+      </div>
+      <div class="master-list" id="supplierList"></div>
+    </div>
+
+    <div class="master-section s3">
+      <h3>社員 / Staff <span class="auto-tag">10名まで</span></h3>
+      <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px;">名前を入れて追加後、詳細ボタンでプロフィール入力できます</p>
+      <div class="input-row">
+        <input type="text" id="newEmployee" placeholder="例：山田 太郎">
+        <button class="btn" onclick="addMaster('employees')">追加 +</button>
+      </div>
+      <div class="master-list" id="employeeList"></div>
+    </div>
+
+    <div class="master-section s4">
+      <h3>融資 / Loans</h3>
+      <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px;">追加後、詳細ボタンで支払履歴や金利を記録できます</p>
+      <div class="input-row" style="flex-wrap: wrap;">
+        <input type="text" id="newLoanName" placeholder="借入先名（例：日本政策金融公庫）" style="flex: 1 1 100%;">
+        <input type="number" id="newLoanBalance" placeholder="現在の残高（円）" inputmode="numeric">
+        <input type="number" id="newLoanPayment" placeholder="毎月返済額（円）" inputmode="numeric">
+        <button class="btn" onclick="addLoan()">追加 +</button>
+      </div>
+      <div class="master-list" id="loanList"></div>
+    </div>
+
+    <div class="master-section s5">
+      <h3>固定費 / Fixed Costs</h3>
+      <div class="input-row">
+        <input type="text" id="newFixedName" placeholder="名称（例：家賃）" style="flex: 2;">
+        <input type="number" id="newFixedAmount" placeholder="金額" inputmode="numeric" style="flex: 1;">
+        <button class="btn" onclick="addFixed()">追加 +</button>
+      </div>
+      <div class="master-list" id="fixedMasterList"></div>
+    </div>
+
+    <div class="master-section s6">
+      <h3>データ管理 / Data</h3>
+      <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 14px;">このiPadに保存されています。バックアップしたい時はJSON書き出しを 🌷</p>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-soft" onclick="exportData()">💾 書き出し</button>
+        <button class="btn btn-soft" onclick="document.getElementById('importFile').click()">📂 読み込み</button>
+        <button class="btn btn-danger" onclick="confirmReset()">🗑 全削除</button>
+        <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- 確認モーダル -->
+<div class="modal-bg" id="confirmModal">
+  <div class="modal">
+    <h3 id="confirmTitle">確認</h3>
+    <p id="confirmMessage"></p>
+    <div class="modal-actions">
+      <button class="btn btn-soft" onclick="closeConfirm()">キャンセル</button>
+      <button class="btn" id="confirmOk" style="background: var(--red);">削除する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 詳細モーダル -->
+<div class="modal-bg" id="detailModal">
+  <div class="modal modal-lg" id="detailModalContent"></div>
+</div>
+
+</div><!-- /#appRoot -->
+
+<script>
+// ============== Firebase ==============
+const firebaseConfig = {
+  apiKey: "AIzaSyB2Jcp4JQbZFOG2OvcT4VaFLf33x3ksCMU",
+  authDomain: "money-diary-shiho.firebaseapp.com",
+  projectId: "money-diary-shiho",
+  storageBucket: "money-diary-shiho.firebasestorage.app",
+  messagingSenderId: "451841166772",
+  appId: "1:451841166772:web:ae42f1caf4ec46db3c36e1"
+};
+const ALLOWED_EMAIL = "k.family.sats@gmail.com";
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+
+let currentUser = null;
+let firestoreUnsub = null;
+let isRemoteUpdate = false; // onSnapshotからの反映中はローカル保存をスキップ
+
+function doLogin() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  document.getElementById('loginError').style.display = 'none';
+  document.getElementById('loginStatus').style.display = 'block';
+  document.getElementById('loginStatus').textContent = 'ログイン中...';
+  auth.signInWithPopup(provider).catch(err => {
+    document.getElementById('loginStatus').style.display = 'none';
+    const errEl = document.getElementById('loginError');
+    errEl.style.display = 'block';
+    errEl.textContent = 'ログインに失敗しました: ' + (err.message || err.code || '不明なエラー');
+  });
+}
+function doLogout() {
+  if (!confirm('ログアウトしますか?')) return;
+  if (firestoreUnsub) firestoreUnsub();
+  auth.signOut();
+}
+
+auth.onAuthStateChanged(user => {
+  if (user && user.email === ALLOWED_EMAIL) {
+    currentUser = user;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appRoot').classList.add('ready');
+    subscribeToData();
+  } else if (user && user.email !== ALLOWED_EMAIL) {
+    // 許可されてないアカウント
+    auth.signOut();
+    document.getElementById('loginStatus').style.display = 'none';
+    const errEl = document.getElementById('loginError');
+    errEl.style.display = 'block';
+    errEl.textContent = 'このアカウントは登録されていません。しほ専用のGoogleアカウントでログインしてください。';
+  } else {
+    currentUser = null;
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('appRoot').classList.remove('ready');
+    document.getElementById('loginStatus').style.display = 'none';
+  }
+});
+
+// ============== Data ==============
+let data = {
+  customers: [], suppliers: [], employees: [],
+  loans: [], fixed: [], monthly: {}
+};
+
+function normalizeData() {
+  data.customers ||= []; data.suppliers ||= []; data.employees ||= [];
+  data.loans ||= []; data.fixed ||= []; data.monthly ||= {};
+  data.employees.forEach(e => {
+    e.profile ||= {};
+    e.family ||= [];
+    e.memo ||= '';
+    e.drawing ||= '';
+  });
+  data.loans.forEach(l => {
+    l.startDate ||= '';
+    l.lender ||= '';
+    l.initialAmount ||= l.initialBalance || 0;
+    l.payments ||= [];
+    l.memo ||= '';
+    l.drawing ||= '';
+  });
+  data.fixed.forEach(f => {
+    f.memo ||= '';
+    f.drawing ||= '';
+  });
+}
+
+function getDocRef() {
+  return db.collection('users').doc(currentUser.uid).collection('data').doc('main');
+}
+
+function subscribeToData() {
+  setSyncStatus('saving', '接続中');
+  if (firestoreUnsub) firestoreUnsub();
+  firestoreUnsub = getDocRef().onSnapshot(doc => {
+    isRemoteUpdate = true;
+    if (doc.exists) {
+      const remote = doc.data();
+      data = remote.payload ? JSON.parse(remote.payload) : data;
+    } else {
+      // 初回：データが無ければ空データを作成
+      getDocRef().set({ payload: JSON.stringify(data), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+    normalizeData();
+    renderAll();
+    setSyncStatus('synced', '同期済み');
+    isRemoteUpdate = false;
+  }, err => {
+    setSyncStatus('', 'エラー');
+    console.error('Firestore同期エラー:', err);
+  });
+}
+
+function setSyncStatus(state, label) {
+  const dot = document.getElementById('syncDot');
+  const lbl = document.getElementById('syncLabel');
+  if (!dot || !lbl) return;
+  dot.className = 'sync-dot' + (state ? ' ' + state : '');
+  lbl.textContent = label;
+}
+
+let saveTimer = null;
+function saveData() {
+  if (isRemoteUpdate) return; // リモート由来の変更はそのまま流さない（無限ループ防止）
+  if (!currentUser) return;
+  setSyncStatus('saving', '保存中');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    const payload = JSON.stringify(data);
+    // Firestore 1ドキュメント最大1MBの制限に注意（手書き画像が多いと超える可能性あり）
+    if (payload.length > 900000) {
+      setSyncStatus('', '容量超過');
+      alert('データ容量がクラウド保存の上限に近づいています。手書きメモを整理するか、バックアップ書き出しをおすすめします。');
+    }
+    getDocRef().set({
+      payload,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      setSyncStatus('synced', '同期済み');
+    }).catch(err => {
+      setSyncStatus('', '保存失敗');
+      console.error('保存エラー:', err);
+    });
+  }, 500);
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+// ============== Year-Month ==============
+let currentYM = (() => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+})();
+function ymLabel(ym) {
+  const [y, m] = ym.split('-');
+  return `${y}.${parseInt(m)}`;
+}
+function ymLabelLong(ym) {
+  const [y, m] = ym.split('-');
+  return `${y}年${parseInt(m)}月`;
+}
+function changeMonth(delta) {
+  const [y, m] = currentYM.split('-').map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  currentYM = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  document.getElementById('ymDisplay').textContent = ymLabel(currentYM);
+  renderAll();
+}
+function getMonthData() {
+  if (!data.monthly[currentYM]) {
+    data.monthly[currentYM] = { sales: {}, purchases: {}, salaries: {}, memoText: '', memoDrawing: '' };
+  }
+  const m = data.monthly[currentYM];
+  m.sales ||= {}; m.purchases ||= {}; m.salaries ||= {};
+  m.memoText ||= ''; m.memoDrawing ||= '';
+  return m;
+}
+
+function yen(n) { return '¥' + (n || 0).toLocaleString('ja-JP'); }
+function formatJP(n) { return (n || 0).toLocaleString('ja-JP'); }
+
+// ============== Tab Switch ==============
+function switchView(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === name));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  renderAll();
+}
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => switchView(t.dataset.view));
+});
+
+// ============== Master ==============
+function addMaster(type) {
+  const inputId = type === 'customers' ? 'newCustomer' : type === 'suppliers' ? 'newSupplier' : 'newEmployee';
+  const input = document.getElementById(inputId);
+  const name = input.value.trim();
+  if (!name) return;
+  if (type === 'employees' && data.employees.length >= 10) {
+    alert('社員は10名までです');
+    return;
+  }
+  if (type === 'employees') {
+    data.employees.push({ id: uid(), name, profile: {}, family: [], memo: '', drawing: '' });
+  } else {
+    data[type].push({ id: uid(), name });
+  }
+  input.value = '';
+  saveData();
+  renderAll();
+}
+function removeMaster(type, id) {
+  pendingDelete = () => {
+    data[type] = data[type].filter(x => x.id !== id);
+    Object.values(data.monthly).forEach(m => {
+      const key = type === 'customers' ? 'sales' : type === 'suppliers' ? 'purchases' : 'salaries';
+      if (m[key]) delete m[key][id];
+    });
+    saveData();
+    renderAll();
+  };
+  showConfirm('削除確認 ♡', 'このデータと月次データも全て削除されます。よろしいですか?');
+}
+
+function addLoan() {
+  const name = document.getElementById('newLoanName').value.trim();
+  const balance = parseFloat(document.getElementById('newLoanBalance').value) || 0;
+  const payment = parseFloat(document.getElementById('newLoanPayment').value) || 0;
+  if (!name) return;
+  data.loans.push({
+    id: uid(), name,
+    startDate: '', lender: '',
+    initialAmount: balance, initialBalance: balance,
+    currentBalance: balance,
+    monthlyPayment: payment,
+    payments: [],
+    memo: '', drawing: ''
+  });
+  document.getElementById('newLoanName').value = '';
+  document.getElementById('newLoanBalance').value = '';
+  document.getElementById('newLoanPayment').value = '';
+  saveData();
+  renderAll();
+}
+function removeLoan(id) {
+  pendingDelete = () => {
+    data.loans = data.loans.filter(x => x.id !== id);
+    saveData();
+    renderAll();
+  };
+  showConfirm('融資削除 ♡', 'この融資データを削除します。よろしいですか?');
+}
+function updateLoanBalance(id, val) {
+  const loan = data.loans.find(l => l.id === id);
+  if (loan) {
+    loan.currentBalance = parseFloat(val) || 0;
+    saveData();
+    renderDashboard();
+    renderLoanCardList();
+  }
+}
+
+function addFixed() {
+  const name = document.getElementById('newFixedName').value.trim();
+  const amount = parseFloat(document.getElementById('newFixedAmount').value) || 0;
+  if (!name) return;
+  data.fixed.push({ id: uid(), name, amount, memo: '', drawing: '' });
+  document.getElementById('newFixedName').value = '';
+  document.getElementById('newFixedAmount').value = '';
+  saveData();
+  renderAll();
+}
+function removeFixed(id) {
+  pendingDelete = () => {
+    data.fixed = data.fixed.filter(x => x.id !== id);
+    saveData();
+    renderAll();
+  };
+  showConfirm('固定費削除 ♡', 'この固定費を削除します。よろしいですか?');
+}
+function updateFixedAmount(id, val) {
+  const f = data.fixed.find(x => x.id === id);
+  if (f) {
+    f.amount = parseFloat(val) || 0;
+    saveData();
+    renderDashboard();
+    renderFixedView();
+  }
+}
+
+// ============== Monthly Entry ==============
+function updateEntry(category, id, val) {
+  const m = getMonthData();
+  const amount = parseFloat(val) || 0;
+  if (amount === 0) {
+    delete m[category][id];
+  } else {
+    m[category][id] = amount;
+  }
+  saveData();
+  if (category === 'sales') renderSalesTotal();
+  if (category === 'purchases') renderPurchaseTotal();
+  if (category === 'salaries') renderSalaryTotal();
+}
+
+// ============== Rendering ==============
+function renderAll() {
+  document.getElementById('ymDisplay').textContent = ymLabel(currentYM);
+  renderDashboard();
+  renderSales();
+  renderPurchase();
+  renderSalary();
+  renderLoanCardList();
+  renderFixedView();
+  renderMonthlyMemo();
+  renderMaster();
+}
+
+function calcMonthTotals(ym) {
+  const m = data.monthly[ym] || { sales: {}, purchases: {}, salaries: {} };
+  const sales = Object.values(m.sales || {}).reduce((a, b) => a + b, 0);
+  const purchases = Object.values(m.purchases || {}).reduce((a, b) => a + b, 0);
+  const salaries = Object.values(m.salaries || {}).reduce((a, b) => a + b, 0);
+  const fixed = data.fixed.reduce((a, b) => a + b.amount, 0);
+  const loanPay = data.loans.reduce((a, b) => a + b.monthlyPayment, 0);
+  return { sales, purchases, salaries, fixed, loanPay, expense: purchases + salaries + fixed + loanPay };
+}
+
+function renderDashboard() {
+  const t = calcMonthTotals(currentYM);
+  const profit = t.sales - t.expense;
+  const loanTotal = data.loans.reduce((a, b) => a + b.currentBalance, 0);
+
+  const heroEl = document.getElementById('heroProfit');
+  heroEl.innerHTML = `${profit >= 0 ? '' : '−'}¥${formatJP(Math.abs(profit))}`;
+  const heroSub = document.getElementById('heroSub');
+  if (t.sales === 0 && t.expense === 0) {
+    heroSub.textContent = '今月のデータを入れてみよう ✨';
+  } else if (profit >= 0) {
+    heroSub.textContent = '🎉 黒字キープ中♡ いい調子！';
+  } else {
+    heroSub.textContent = '今月は赤字みたい…見直してみよう 🌿';
+  }
+
+  document.getElementById('dashSales').textContent = formatJP(t.sales);
+  document.getElementById('dashSalesSub').textContent = `${Object.keys(data.monthly[currentYM]?.sales || {}).length}件入力`;
+  document.getElementById('dashExpense').textContent = formatJP(t.expense);
+  document.getElementById('dashLoan').textContent = formatJP(loanTotal);
+  document.getElementById('dashLoanSub').textContent = `${data.loans.length}件の融資`;
+
+  const items = [
+    { label: '買掛', val: t.purchases, color: 'var(--pink)' },
+    { label: '給与', val: t.salaries, color: 'var(--blue)' },
+    { label: '固定費', val: t.fixed, color: 'var(--orange)' },
+    { label: '融資返済', val: t.loanPay, color: 'var(--red)' }
+  ];
+  const max = Math.max(...items.map(i => i.val), 1);
+  document.getElementById('breakdownList').innerHTML = items.map(i => `
+    <div class="breakdown-row">
+      <div class="lbl">${i.label}</div>
+      <div class="bar-wrap"><div class="bar" style="width:${(i.val / max) * 100}%; background:${i.color};"></div></div>
+      <div class="val num">${yen(i.val)}</div>
+    </div>
+  `).join('');
+
+  renderChart();
+}
+
+function renderChart() {
+  const canvas = document.getElementById('monthlyChart');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.offsetWidth;
+  const h = 240;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+
+  const [cy, cm] = currentYM.split('-').map(Number);
+  const months = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(cy, cm - 1 - i, 1);
+    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  }
+  const totals = months.map(ym => calcMonthTotals(ym));
+  const maxVal = Math.max(...totals.flatMap(t => [t.sales, t.expense]), 1000);
+
+  const padL = 50, padR = 16, padT = 22, padB = 32;
+  const cw = w - padL - padR;
+  const ch = h - padT - padB;
+
+  ctx.strokeStyle = '#f0c8e6';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 4]);
+  ctx.font = '10px "DM Mono", monospace';
+  ctx.fillStyle = '#6b5b7e';
+  for (let i = 0; i <= 4; i++) {
+    const y = padT + (ch / 4) * i;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+    const val = maxVal * (1 - i / 4);
+    ctx.textAlign = 'right';
+    ctx.fillText((val / 10000).toFixed(0) + '万', padL - 6, y + 3);
+  }
+  ctx.setLineDash([]);
+
+  const barW = cw / months.length * 0.32;
+  months.forEach((ym, i) => {
+    const x = padL + (cw / months.length) * (i + 0.5);
+    const sH = (totals[i].sales / maxVal) * ch;
+    const eH = (totals[i].expense / maxVal) * ch;
+    ctx.fillStyle = '#5a7df5';
+    ctx.fillRect(x - barW - 1, padT + ch - sH, barW, sH);
+    ctx.strokeStyle = '#2a1f3d'; ctx.lineWidth = 1.5;
+    ctx.strokeRect(x - barW - 1, padT + ch - sH, barW, sH);
+    ctx.fillStyle = '#f0c8e6';
+    ctx.fillRect(x + 1, padT + ch - eH, barW, eH);
+    ctx.strokeRect(x + 1, padT + ch - eH, barW, eH);
+
+    const isCurrent = ym === currentYM;
+    ctx.fillStyle = isCurrent ? '#f42d23' : '#6b5b7e';
+    ctx.font = isCurrent ? 'bold 10px "DM Mono", monospace' : '10px "DM Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(ym.split('-')[1], x, h - padB + 14);
+  });
+
+  ctx.font = '600 11px "Fraunces", serif';
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#5a7df5'; ctx.fillRect(padL, 4, 12, 12);
+  ctx.strokeStyle = '#2a1f3d'; ctx.lineWidth = 1.5;
+  ctx.strokeRect(padL, 4, 12, 12);
+  ctx.fillStyle = '#2a1f3d'; ctx.fillText('Sales', padL + 16, 14);
+  ctx.fillStyle = '#f0c8e6'; ctx.fillRect(padL + 64, 4, 12, 12);
+  ctx.strokeRect(padL + 64, 4, 12, 12);
+  ctx.fillStyle = '#2a1f3d'; ctx.fillText('Expense', padL + 80, 14);
+}
+
+function renderSales() {
+  document.getElementById('salesMonthLabel').textContent = ymLabelLong(currentYM) + 'の Sales';
+  const list = document.getElementById('salesList');
+  const m = getMonthData();
+  if (data.customers.length === 0) {
+    list.innerHTML = '<div class="empty">まだ得意先がありません<div class="empty-hint">↓ マスタ管理から追加してください</div></div>';
+  } else {
+    list.innerHTML = data.customers.map(c => `
+      <div class="entry-item">
+        <div class="entry-name">${escapeHtml(c.name)}</div>
+        <input type="number" inputmode="numeric" class="entry-amount"
+               value="${m.sales[c.id] || ''}" placeholder="0"
+               onchange="updateEntry('sales', '${c.id}', this.value)">
+      </div>
+    `).join('');
+  }
+  renderSalesTotal();
+}
+function renderSalesTotal() {
+  document.getElementById('salesTotal').textContent = yen(Object.values(getMonthData().sales || {}).reduce((a, b) => a + b, 0));
+}
+
+function renderPurchase() {
+  document.getElementById('purchaseMonthLabel').textContent = ymLabelLong(currentYM) + 'の Purchase';
+  const list = document.getElementById('purchaseList');
+  const m = getMonthData();
+  if (data.suppliers.length === 0) {
+    list.innerHTML = '<div class="empty">まだ仕入先がありません<div class="empty-hint">↓ マスタ管理から追加してください</div></div>';
+  } else {
+    list.innerHTML = data.suppliers.map(s => `
+      <div class="entry-item">
+        <div class="entry-name">${escapeHtml(s.name)}</div>
+        <input type="number" inputmode="numeric" class="entry-amount"
+               value="${m.purchases[s.id] || ''}" placeholder="0"
+               onchange="updateEntry('purchases', '${s.id}', this.value)">
+      </div>
+    `).join('');
+  }
+  renderPurchaseTotal();
+}
+function renderPurchaseTotal() {
+  document.getElementById('purchaseTotal').textContent = yen(Object.values(getMonthData().purchases || {}).reduce((a, b) => a + b, 0));
+}
+
+function renderSalary() {
+  document.getElementById('salaryMonthLabel').textContent = ymLabelLong(currentYM) + 'の Salary';
+  const list = document.getElementById('salaryList');
+  const m = getMonthData();
+  if (data.employees.length === 0) {
+    list.innerHTML = '<div class="empty">まだ社員が登録されていません<div class="empty-hint">↓ マスタ管理から追加してください</div></div>';
+  } else {
+    list.innerHTML = data.employees.map(e => `
+      <div class="entry-item">
+        <div class="entry-name">${escapeHtml(e.name)}</div>
+        <button class="btn-detail btn-sm" onclick="openEmployeeDetail('${e.id}')">👤</button>
+        <input type="number" inputmode="numeric" class="entry-amount"
+               value="${m.salaries[e.id] || ''}" placeholder="0"
+               onchange="updateEntry('salaries', '${e.id}', this.value)">
+      </div>
+    `).join('');
+  }
+  renderSalaryTotal();
+}
+function renderSalaryTotal() {
+  document.getElementById('salaryTotal').textContent = yen(Object.values(getMonthData().salaries || {}).reduce((a, b) => a + b, 0));
+}
+
+function renderLoanCardList() {
+  const list = document.getElementById('loanCardList');
+  if (data.loans.length === 0) {
+    list.innerHTML = '<div class="empty">まだ融資データがありません<div class="empty-hint">マスタ管理から追加してください</div></div>';
+    return;
+  }
+  list.innerHTML = data.loans.map(l => {
+    const monthsLeft = l.monthlyPayment > 0 ? Math.ceil(l.currentBalance / l.monthlyPayment) : 0;
+    const yearsLeft = (monthsLeft / 12).toFixed(1);
+    const initial = l.initialAmount || l.initialBalance || 0;
+    const progressPct = initial > 0 ? Math.max(0, Math.min(100, (1 - l.currentBalance / initial) * 100)) : 0;
+    const lastPayment = l.payments && l.payments.length > 0 ? l.payments[l.payments.length - 1] : null;
+    return `
+      <div class="loan-card">
+        <div class="loan-header">
+          <div class="loan-name">${escapeHtml(l.name)}</div>
+          <div class="loan-badge">あと ${monthsLeft}ヶ月 (${yearsLeft}年)</div>
+        </div>
+        <div class="loan-body">
+          <div>
+            <label>現在残高 / Balance</label>
+            <input type="number" inputmode="numeric"
+                   value="${l.currentBalance}"
+                   onchange="updateLoanBalance('${l.id}', this.value)"
+                   style="width: 170px; padding: 9px 12px;">
+          </div>
+          <div style="font-size: 13px; color: var(--ink);">
+            毎月返済 <span class="num" style="font-weight: 600;">${yen(l.monthlyPayment)}</span>
+          </div>
+        </div>
+        <div class="loan-meta">
+          ${l.lender ? `<div class="loan-meta-item">借入先: ${escapeHtml(l.lender)}</div>` : ''}
+          ${l.startDate ? `<div class="loan-meta-item">借入日: ${escapeHtml(l.startDate)}</div>` : ''}
+          ${initial ? `<div class="loan-meta-item">当初: ${yen(initial)}</div>` : ''}
+          ${lastPayment ? `<div class="loan-meta-item">最新金利: ${lastPayment.interestRate || '-'}%</div>` : ''}
+        </div>
+        <div class="loan-progress">
+          <div class="loan-progress-fill" style="width: ${progressPct}%;"></div>
+        </div>
+        <div class="loan-pct">返済進捗 ${progressPct.toFixed(1)}% ✨</div>
+        <div class="loan-actions">
+          <button class="btn-detail" onclick="openLoanDetail('${l.id}')">📝 詳細・支払履歴</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderFixedView() {
+  const list = document.getElementById('fixedList');
+  if (data.fixed.length === 0) {
+    list.innerHTML = '<div class="empty">まだ固定費がありません<div class="empty-hint">マスタ管理から追加してください</div></div>';
+  } else {
+    list.innerHTML = data.fixed.map(f => `
+      <div class="entry-item">
+        <div class="entry-name">
+          ${escapeHtml(f.name)}
+          ${f.memo || f.drawing ? '<span style="font-size: 11px; color: var(--blue); margin-left: 6px;">📝</span>' : ''}
+        </div>
+        <button class="btn-detail btn-sm" onclick="openFixedDetail('${f.id}')">詳細</button>
+        <input type="number" inputmode="numeric" class="entry-amount"
+               value="${f.amount}"
+               onchange="updateFixedAmount('${f.id}', this.value)">
+      </div>
+    `).join('');
+  }
+  document.getElementById('fixedTotal').textContent = yen(data.fixed.reduce((a, b) => a + b.amount, 0));
+}
+
+function renderMaster() {
+  const emptyMsg = '<div style="color: var(--ink-light); font-size: 13px; padding: 8px 0;">まだありません</div>';
+
+  document.getElementById('customerList').innerHTML = data.customers.length === 0 ? emptyMsg
+    : data.customers.map(c => `
+        <div class="master-item">
+          <div class="name">${escapeHtml(c.name)}</div>
+          <button class="btn btn-danger" onclick="removeMaster('customers', '${c.id}')">削除</button>
+        </div>`).join('');
+
+  document.getElementById('supplierList').innerHTML = data.suppliers.length === 0 ? emptyMsg
+    : data.suppliers.map(s => `
+        <div class="master-item">
+          <div class="name">${escapeHtml(s.name)}</div>
+          <button class="btn btn-danger" onclick="removeMaster('suppliers', '${s.id}')">削除</button>
+        </div>`).join('');
+
+  document.getElementById('employeeList').innerHTML = data.employees.length === 0 ? emptyMsg
+    : data.employees.map(e => `
+        <div class="master-item">
+          <div class="name">${escapeHtml(e.name)}</div>
+          <button class="btn-detail btn-sm" onclick="openEmployeeDetail('${e.id}')">プロフィール</button>
+          <button class="btn btn-danger" onclick="removeMaster('employees', '${e.id}')">削除</button>
+        </div>`).join('');
+
+  document.getElementById('loanList').innerHTML = data.loans.length === 0 ? emptyMsg
+    : data.loans.map(l => `
+        <div class="master-item">
+          <div class="name">${escapeHtml(l.name)}</div>
+          <div class="meta">残${yen(l.currentBalance)}/月${yen(l.monthlyPayment)}</div>
+          <button class="btn btn-danger" onclick="removeLoan('${l.id}')">削除</button>
+        </div>`).join('');
+
+  document.getElementById('fixedMasterList').innerHTML = data.fixed.length === 0 ? emptyMsg
+    : data.fixed.map(f => `
+        <div class="master-item">
+          <div class="name">${escapeHtml(f.name)}</div>
+          <div class="meta">${yen(f.amount)}/月</div>
+          <button class="btn btn-danger" onclick="removeFixed('${f.id}')">削除</button>
+        </div>`).join('');
+}
+
+// ============== Monthly Memo ==============
+let monthlyMemoCanvas = null;
+
+function renderMonthlyMemo() {
+  document.getElementById('memoMonthLabel').textContent = ymLabelLong(currentYM) + 'のメモ';
+  const m = getMonthData();
+  document.getElementById('memoText').value = m.memoText || '';
+  
+  // キャンバスは表示時に初期化
+  setTimeout(() => {
+    if (document.getElementById('view-memo').classList.contains('active')) {
+      const canvas = document.getElementById('memoCanvas');
+      monthlyMemoCanvas = new DrawCanvas(canvas, m.memoDrawing, (dataUrl) => {
+        const md = getMonthData();
+        md.memoDrawing = dataUrl;
+        saveData();
+      });
+      setupToolbar('memoCanvasToolbar', monthlyMemoCanvas);
+    }
+  }, 50);
+}
+
+function saveMemoText() {
+  const m = getMonthData();
+  m.memoText = document.getElementById('memoText').value;
+  saveData();
+}
+
+// ============== Draw Canvas ==============
+class DrawCanvas {
+  constructor(canvas, initialDataUrl, onChange) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.drawing = false;
+    this.lastX = 0; this.lastY = 0;
+    this.color = '#2a1f3d';
+    this.lineWidth = 2;
+    this.onChange = onChange;
+    this.saveTimer = null;
+    this.setupSize();
+    this.bindEvents();
+    if (initialDataUrl) this.loadFromData(initialDataUrl);
+  }
+  setupSize() {
+    const rect = this.canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+    this.dpr = dpr;
+    this.ctx.scale(dpr, dpr);
+    this.ctx.lineCap = 'round';
+    this.ctx.lineJoin = 'round';
+  }
+  bindEvents() {
+    this.canvas.addEventListener('pointerdown', e => this.start(e));
+    this.canvas.addEventListener('pointermove', e => this.move(e));
+    this.canvas.addEventListener('pointerup', e => this.end(e));
+    this.canvas.addEventListener('pointerleave', e => this.end(e));
+    this.canvas.addEventListener('pointercancel', e => this.end(e));
+  }
+  getPos(e) {
+    const rect = this.canvas.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  }
+  start(e) {
+    e.preventDefault();
+    this.drawing = true;
+    const p = this.getPos(e);
+    this.lastX = p.x; this.lastY = p.y;
+    this.ctx.strokeStyle = this.color;
+    this.ctx.lineWidth = this.lineWidth;
+    // ドット用に小さな点を最初に描く
+    this.ctx.beginPath();
+    this.ctx.arc(p.x, p.y, this.lineWidth / 2, 0, Math.PI * 2);
+    this.ctx.fillStyle = this.color;
+    this.ctx.fill();
+  }
+  move(e) {
+    if (!this.drawing) return;
+    e.preventDefault();
+    const p = this.getPos(e);
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.lastX, this.lastY);
+    this.ctx.lineTo(p.x, p.y);
+    this.ctx.stroke();
+    this.lastX = p.x; this.lastY = p.y;
+  }
+  end(e) {
+    if (!this.drawing) return;
+    this.drawing = false;
+    this.scheduleSave();
+  }
+  scheduleSave() {
+    clearTimeout(this.saveTimer);
+    this.saveTimer = setTimeout(() => {
+      if (this.onChange) this.onChange(this.toData());
+    }, 400);
+  }
+  clear() {
+    this.ctx.clearRect(0, 0, this.canvas.width / this.dpr, this.canvas.height / this.dpr);
+    if (this.onChange) this.onChange('');
+  }
+  setColor(c) { this.color = c; }
+  setWidth(w) { this.lineWidth = w; }
+  toData() {
+    return this.canvas.toDataURL('image/png');
+  }
+  loadFromData(dataUrl) {
+    const img = new Image();
+    img.onload = () => {
+      this.ctx.drawImage(img, 0, 0, this.canvas.width / this.dpr, this.canvas.height / this.dpr);
+    };
+    img.src = dataUrl;
+  }
+}
+
+function setupToolbar(toolbarId, canvas) {
+  const colors = ['#2a1f3d', '#5a7df5', '#f42d23', '#ffaf78', '#41bcf5', '#f0c8e6'];
+  const widths = [{w: 2, label: '細'}, {w: 4, label: '中'}, {w: 8, label: '太'}];
+  const toolbar = document.getElementById(toolbarId);
+  toolbar.innerHTML = `
+    ${colors.map((c, i) => `<button class="color-btn ${i === 0 ? 'active' : ''}" style="background:${c};" data-color="${c}"></button>`).join('')}
+    <div class="draw-divider"></div>
+    ${widths.map((w, i) => `<button class="btn btn-soft btn-sm ${i === 0 ? 'active-w' : ''}" data-width="${w.w}" style="padding: 5px 10px; font-size: 11px;">${w.label}</button>`).join('')}
+    <div class="draw-divider"></div>
+    <button class="btn btn-danger" data-action="clear">🗑 消去</button>
+  `;
+  toolbar.querySelectorAll('[data-color]').forEach(b => {
+    b.addEventListener('click', () => {
+      toolbar.querySelectorAll('.color-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      canvas.setColor(b.dataset.color);
+    });
+  });
+  toolbar.querySelectorAll('[data-width]').forEach(b => {
+    b.addEventListener('click', () => {
+      canvas.setWidth(parseInt(b.dataset.width));
+    });
+  });
+  toolbar.querySelector('[data-action="clear"]').addEventListener('click', () => {
+    if (confirm('手書きを消去します。よろしいですか?')) {
+      canvas.clear();
+    }
+  });
+}
+
+// ============== Detail Modals ==============
+function openDetailModal(html) {
+  const modal = document.getElementById('detailModalContent');
+  modal.innerHTML = html;
+  document.getElementById('detailModal').classList.add('show');
+}
+function closeDetailModal() {
+  document.getElementById('detailModal').classList.remove('show');
+  // データ保存
+  saveData();
+}
+document.getElementById('detailModal').addEventListener('click', e => {
+  if (e.target.id === 'detailModal') closeDetailModal();
+});
+
+// ---- 従業員プロフィール ----
+function openEmployeeDetail(id) {
+  const emp = data.employees.find(e => e.id === id);
+  if (!emp) return;
+  const p = emp.profile;
+  
+  openDetailModal(`
+    <h3>👤 ${escapeHtml(emp.name)} のプロフィール</h3>
+    
+    <div class="modal-section">
+      <div class="modal-section-title">基本情報</div>
+      <div class="form-grid">
+        <div><label>フリガナ</label><input type="text" id="emp_furigana" value="${escapeHtml(p.furigana || '')}"></div>
+        <div><label>生年月日</label><input type="date" id="emp_birthday" value="${p.birthday || ''}"></div>
+        <div><label>電話番号</label><input type="text" id="emp_phone" value="${escapeHtml(p.phone || '')}"></div>
+        <div><label>入社日</label><input type="date" id="emp_joinDate" value="${p.joinDate || ''}"></div>
+        <div style="grid-column: 1 / -1;"><label>郵便番号</label><input type="text" id="emp_postal" value="${escapeHtml(p.postal || '')}" placeholder="〒"></div>
+        <div style="grid-column: 1 / -1;"><label>住所</label><input type="text" id="emp_address" value="${escapeHtml(p.address || '')}"></div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">緊急連絡先</div>
+      <div class="form-grid">
+        <div><label>氏名</label><input type="text" id="emp_emName" value="${escapeHtml(p.emName || '')}"></div>
+        <div><label>続柄</label><input type="text" id="emp_emRelation" value="${escapeHtml(p.emRelation || '')}" placeholder="例：配偶者"></div>
+        <div style="grid-column: 1 / -1;"><label>電話番号</label><input type="text" id="emp_emPhone" value="${escapeHtml(p.emPhone || '')}"></div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">通勤情報</div>
+      <div class="form-grid">
+        <div><label>出発駅</label><input type="text" id="emp_commuteFrom" value="${escapeHtml(p.commuteFrom || '')}"></div>
+        <div><label>到着駅</label><input type="text" id="emp_commuteTo" value="${escapeHtml(p.commuteTo || '')}"></div>
+        <div style="grid-column: 1 / -1;"><label>経路</label><input type="text" id="emp_commuteRoute" value="${escapeHtml(p.commuteRoute || '')}" placeholder="例：御堂筋線 → 中央線"></div>
+        <div><label>定期代/月</label><input type="number" id="emp_commuteFee" value="${p.commuteFee || ''}" inputmode="numeric"></div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">家族情報 <button class="btn btn-pink btn-sm" onclick="addFamilyRow('${id}')" style="margin-left: 8px;">+ 家族追加</button></div>
+      <div id="familyList_${id}" class="family-list"></div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">メモ</div>
+      <textarea id="emp_memo" placeholder="その他の情報、特記事項など...">${escapeHtml(emp.memo || '')}</textarea>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">手書きメモ</div>
+      <div class="draw-wrap">
+        <canvas class="draw-canvas" id="emp_canvas"></canvas>
+        <div class="draw-toolbar" id="emp_canvas_toolbar"></div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-soft" onclick="closeDetailModal()">閉じる</button>
+      <button class="btn" onclick="saveEmployeeDetail('${id}')">💾 保存</button>
+    </div>
+  `);
+
+  // 家族リスト
+  renderFamilyList(id);
+  
+  // キャンバス
+  setTimeout(() => {
+    const canvas = document.getElementById('emp_canvas');
+    const drawCanvas = new DrawCanvas(canvas, emp.drawing, (dataUrl) => {
+      emp.drawing = dataUrl;
+    });
+    setupToolbar('emp_canvas_toolbar', drawCanvas);
+    window._currentDrawCanvas = drawCanvas;
+  }, 50);
+}
+
+function renderFamilyList(empId) {
+  const emp = data.employees.find(e => e.id === empId);
+  if (!emp) return;
+  const list = document.getElementById('familyList_' + empId);
+  if (!list) return;
+  if (emp.family.length === 0) {
+    list.innerHTML = '<div style="font-size: 12px; color: var(--ink-light); padding: 8px 0;">家族情報なし</div>';
+    return;
+  }
+  list.innerHTML = emp.family.map((f, i) => `
+    <div class="family-row">
+      <input type="text" placeholder="続柄" value="${escapeHtml(f.relation || '')}" onchange="updateFamily('${empId}', ${i}, 'relation', this.value)">
+      <input type="text" placeholder="氏名" value="${escapeHtml(f.name || '')}" onchange="updateFamily('${empId}', ${i}, 'name', this.value)">
+      <input type="date" value="${f.birthday || ''}" onchange="updateFamily('${empId}', ${i}, 'birthday', this.value)">
+      <button class="btn btn-danger" onclick="removeFamily('${empId}', ${i})">×</button>
+    </div>
+  `).join('');
+}
+function addFamilyRow(empId) {
+  const emp = data.employees.find(e => e.id === empId);
+  if (!emp) return;
+  emp.family.push({ relation: '', name: '', birthday: '' });
+  renderFamilyList(empId);
+}
+function updateFamily(empId, idx, field, val) {
+  const emp = data.employees.find(e => e.id === empId);
+  if (!emp || !emp.family[idx]) return;
+  emp.family[idx][field] = val;
+}
+function removeFamily(empId, idx) {
+  const emp = data.employees.find(e => e.id === empId);
+  if (!emp) return;
+  emp.family.splice(idx, 1);
+  renderFamilyList(empId);
+}
+
+function saveEmployeeDetail(id) {
+  const emp = data.employees.find(e => e.id === id);
+  if (!emp) return;
+  const fields = ['furigana', 'birthday', 'phone', 'joinDate', 'postal', 'address',
+                  'emName', 'emRelation', 'emPhone',
+                  'commuteFrom', 'commuteTo', 'commuteRoute', 'commuteFee'];
+  fields.forEach(f => {
+    const el = document.getElementById('emp_' + f);
+    if (el) emp.profile[f] = el.value;
+  });
+  emp.memo = document.getElementById('emp_memo').value;
+  saveData();
+  closeDetailModal();
+  alert('保存しました ♡');
+}
+
+// ---- 融資詳細 ----
+function openLoanDetail(id) {
+  const loan = data.loans.find(l => l.id === id);
+  if (!loan) return;
+
+  openDetailModal(`
+    <h3>🏦 ${escapeHtml(loan.name)} の詳細</h3>
+
+    <div class="modal-section">
+      <div class="modal-section-title">借入情報</div>
+      <div class="form-grid">
+        <div><label>借入元（金融機関名）</label><input type="text" id="loan_lender" value="${escapeHtml(loan.lender || '')}" placeholder="例：日本政策金融公庫"></div>
+        <div><label>借入開始日</label><input type="date" id="loan_startDate" value="${loan.startDate || ''}"></div>
+        <div><label>当初借入額</label><input type="number" id="loan_initialAmount" value="${loan.initialAmount || ''}" inputmode="numeric"></div>
+        <div><label>毎月返済額</label><input type="number" id="loan_monthlyPayment" value="${loan.monthlyPayment || ''}" inputmode="numeric"></div>
+        <div style="grid-column: 1 / -1;"><label>現在残高</label><input type="number" id="loan_currentBalance" value="${loan.currentBalance || ''}" inputmode="numeric"></div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">支払履歴（金利を毎月記録）</div>
+      <div class="pay-history">
+        <div class="pay-history-header">
+          <div>支払日</div>
+          <div>支払額</div>
+          <div>金利(%)</div>
+          <div>メモ</div>
+          <div></div>
+        </div>
+        <div class="pay-form">
+          <input type="month" id="payDate" value="${currentYM}">
+          <input type="number" id="payAmount" placeholder="金額" inputmode="numeric" value="${loan.monthlyPayment || ''}">
+          <input type="number" id="payRate" placeholder="2.5" step="0.01" inputmode="decimal">
+          <input type="text" id="payNote" placeholder="メモ">
+          <button class="btn btn-sm" onclick="addPayment('${id}')">+</button>
+        </div>
+        <div id="payHistoryList"></div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">メモ</div>
+      <textarea id="loan_memo" placeholder="契約条件、担当者、特記事項など...">${escapeHtml(loan.memo || '')}</textarea>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">手書きメモ</div>
+      <div class="draw-wrap">
+        <canvas class="draw-canvas" id="loan_canvas"></canvas>
+        <div class="draw-toolbar" id="loan_canvas_toolbar"></div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-soft" onclick="closeDetailModal()">閉じる</button>
+      <button class="btn" onclick="saveLoanDetail('${id}')">💾 保存</button>
+    </div>
+  `);
+
+  renderPayHistory(id);
+
+  setTimeout(() => {
+    const canvas = document.getElementById('loan_canvas');
+    const drawCanvas = new DrawCanvas(canvas, loan.drawing, (dataUrl) => {
+      loan.drawing = dataUrl;
+    });
+    setupToolbar('loan_canvas_toolbar', drawCanvas);
+  }, 50);
+}
+
+function renderPayHistory(id) {
+  const loan = data.loans.find(l => l.id === id);
+  if (!loan) return;
+  const list = document.getElementById('payHistoryList');
+  if (!list) return;
+  if (loan.payments.length === 0) {
+    list.innerHTML = '<div class="empty" style="padding: 14px; font-size: 12px; background: white;">まだ支払い記録なし</div>';
+    return;
+  }
+  // 日付降順
+  const sorted = [...loan.payments].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  list.innerHTML = sorted.map((p, i) => `
+    <div class="pay-history-row">
+      <div class="num">${p.date || '-'}</div>
+      <div class="num">${yen(p.amount)}</div>
+      <div class="num">${p.rate || '-'}%</div>
+      <div style="font-size: 11px;">${escapeHtml(p.note || '')}</div>
+      <button class="btn btn-danger" onclick="removePayment('${id}', ${loan.payments.indexOf(p)})">×</button>
+    </div>
+  `).join('');
+}
+
+function addPayment(id) {
+  const loan = data.loans.find(l => l.id === id);
+  if (!loan) return;
+  const date = document.getElementById('payDate').value;
+  const amount = parseFloat(document.getElementById('payAmount').value) || 0;
+  const rate = parseFloat(document.getElementById('payRate').value) || 0;
+  const note = document.getElementById('payNote').value;
+  if (!date || amount === 0) {
+    alert('日付と金額を入力してください');
+    return;
+  }
+  loan.payments.push({ date, amount, rate, note });
+  // 残高自動更新
+  loan.currentBalance = Math.max(0, (loan.currentBalance || 0) - amount);
+  document.getElementById('loan_currentBalance').value = loan.currentBalance;
+  document.getElementById('payNote').value = '';
+  document.getElementById('payRate').value = '';
+  saveData();
+  renderPayHistory(id);
+}
+function removePayment(id, idx) {
+  if (!confirm('この支払記録を削除しますか?')) return;
+  const loan = data.loans.find(l => l.id === id);
+  if (!loan) return;
+  loan.payments.splice(idx, 1);
+  saveData();
+  renderPayHistory(id);
+}
+
+function saveLoanDetail(id) {
+  const loan = data.loans.find(l => l.id === id);
+  if (!loan) return;
+  loan.lender = document.getElementById('loan_lender').value;
+  loan.startDate = document.getElementById('loan_startDate').value;
+  loan.initialAmount = parseFloat(document.getElementById('loan_initialAmount').value) || 0;
+  loan.monthlyPayment = parseFloat(document.getElementById('loan_monthlyPayment').value) || 0;
+  loan.currentBalance = parseFloat(document.getElementById('loan_currentBalance').value) || 0;
+  loan.memo = document.getElementById('loan_memo').value;
+  saveData();
+  closeDetailModal();
+  renderAll();
+  alert('保存しました ♡');
+}
+
+// ---- 固定費詳細 ----
+function openFixedDetail(id) {
+  const fixed = data.fixed.find(f => f.id === id);
+  if (!fixed) return;
+
+  openDetailModal(`
+    <h3>🫧 ${escapeHtml(fixed.name)} の詳細</h3>
+
+    <div class="modal-section">
+      <div class="modal-section-title">基本情報</div>
+      <div class="form-grid">
+        <div><label>名称</label><input type="text" id="fix_name" value="${escapeHtml(fixed.name)}"></div>
+        <div><label>金額/月</label><input type="number" id="fix_amount" value="${fixed.amount}" inputmode="numeric"></div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">メモ</div>
+      <textarea id="fix_memo" placeholder="契約番号、担当者名、更新日、解約条件など...">${escapeHtml(fixed.memo || '')}</textarea>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">手書きメモ</div>
+      <div class="draw-wrap">
+        <canvas class="draw-canvas" id="fix_canvas"></canvas>
+        <div class="draw-toolbar" id="fix_canvas_toolbar"></div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-soft" onclick="closeDetailModal()">閉じる</button>
+      <button class="btn" onclick="saveFixedDetail('${id}')">💾 保存</button>
+    </div>
+  `);
+
+  setTimeout(() => {
+    const canvas = document.getElementById('fix_canvas');
+    const drawCanvas = new DrawCanvas(canvas, fixed.drawing, (dataUrl) => {
+      fixed.drawing = dataUrl;
+    });
+    setupToolbar('fix_canvas_toolbar', drawCanvas);
+  }, 50);
+}
+function saveFixedDetail(id) {
+  const fixed = data.fixed.find(f => f.id === id);
+  if (!fixed) return;
+  fixed.name = document.getElementById('fix_name').value;
+  fixed.amount = parseFloat(document.getElementById('fix_amount').value) || 0;
+  fixed.memo = document.getElementById('fix_memo').value;
+  saveData();
+  closeDetailModal();
+  renderAll();
+  alert('保存しました ♡');
+}
+
+// ============== Utility ==============
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+let pendingDelete = null;
+function showConfirm(title, message) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMessage').textContent = message;
+  document.getElementById('confirmModal').classList.add('show');
+}
+function closeConfirm() {
+  document.getElementById('confirmModal').classList.remove('show');
+  pendingDelete = null;
+}
+document.getElementById('confirmOk').addEventListener('click', () => {
+  if (pendingDelete) pendingDelete();
+  closeConfirm();
+});
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `money-diary-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      pendingDelete = () => {
+        data = imported;
+        normalizeData();
+        saveData();
+        renderAll();
+      };
+      showConfirm('読み込み確認 ♡', '今のデータを上書きします。よろしいですか?');
+    } catch(err) {
+      alert('ファイルが読み込めませんでした');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+function confirmReset() {
+  pendingDelete = () => {
+    data = { customers: [], suppliers: [], employees: [], loans: [], fixed: [], monthly: {} };
+    saveData();
+    renderAll();
+  };
+  showConfirm('全削除 ⚠', '全データを削除します。元に戻せないので慎重に!');
+}
+
+// データ読み込みは auth.onAuthStateChanged → subscribeToData() 経由で行われる
+window.addEventListener('resize', () => { if (currentUser) renderChart(); });
+</script>
+</body>
+</html>
