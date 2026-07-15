@@ -8,10 +8,26 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Zen+Maru+Gothic:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<!-- 開発版：Firebase無効（ローカル保存のみ） -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-  #loginScreen { display: none !important; }
-  #appRoot { display: block !important; }
+  /* ===== ログイン画面 ===== */
+  #loginScreen {
+    position: fixed; inset: 0;
+    background: var(--cream);
+    background-image:
+      radial-gradient(circle at 10% 20%, var(--peach-soft) 0%, transparent 35%),
+      radial-gradient(circle at 90% 80%, var(--pink-soft) 0%, transparent 35%);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999;
+    flex-direction: column;
+    padding: 20px;
+    text-align: center;
+  }
+  #appRoot { display: none; }
+  #appRoot.ready { display: block; }
   #loginScreen .login-logo {
     font-family: 'Fraunces', serif;
     font-style: italic;
@@ -956,7 +972,6 @@
     <span class="heart">♥</span>
     <span style="font-style: italic;">Money Diary</span>
     <span class="sub">KEIEI</span>
-    <span class="sub" style="background: var(--orange); margin-left: 4px;">DEV</span>
   </div>
   <div class="header-right">
     <div class="sync-badge"><span class="sync-dot" id="syncDot"></span><span id="syncLabel">-</span></div>
@@ -965,7 +980,7 @@
       <div class="ym-display" id="ymDisplay">2026.5</div>
       <button onclick="changeMonth(1)">›</button>
     </div>
-    <button id="logoutBtn" onclick="doLogout()" title="ログアウト" style="display:none;">⏻</button>
+    <button id="logoutBtn" onclick="doLogout()" title="ログアウト">⏻</button>
   </div>
 </header>
 
@@ -1165,6 +1180,23 @@
       <div class="master-list" id="fixedMasterList"></div>
     </div>
 
+    <div class="master-section s5">
+      <h3>📊 Excel出力 / Export</h3>
+      <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 12px;">1年分のデータをExcel（.xlsx）で書き出します。税理士さんへの共有などにどうぞ🌷（メモ・手書きは含まれません）</p>
+      <div class="input-row" style="gap: 8px; margin-bottom: 10px;">
+        <button class="subtab active" id="exportModeFiscal" onclick="setExportMode('fiscal')" style="flex:1; text-align:center;">🏢 事業年度（9〜8月）</button>
+        <button class="subtab" id="exportModeCalendar" onclick="setExportMode('calendar')" style="flex:1; text-align:center;">📆 暦年（1〜12月）</button>
+      </div>
+      <div class="input-row" style="align-items: center; gap: 12px;">
+        <div class="ym-picker" style="display: inline-flex;">
+          <button onclick="changeExportYear(-1)">‹</button>
+          <div class="ym-display" id="exportYearLabel" style="min-width: 160px;">-</div>
+          <button onclick="changeExportYear(1)">›</button>
+        </div>
+        <button class="btn btn-orange" onclick="exportToExcel()" style="flex:1;">📥 Excelで書き出す</button>
+      </div>
+    </div>
+
     <div class="master-section s6">
       <h3>データ管理 / Data</h3>
       <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 14px;">このiPadに保存されています。バックアップしたい時はJSON書き出しを 🌷</p>
@@ -1199,10 +1231,69 @@
 </div><!-- /#appRoot -->
 
 <script>
-// ============== Data (開発版：ローカル保存のみ、Firebase無効) ==============
-const STORAGE_KEY = 'keiei_note_data_dev_v1';
-let currentUser = { uid: 'dev-local' }; // 開発版はログイン不要
+// ============== Firebase ==============
+const firebaseConfig = {
+  apiKey: "AIzaSyB2Jcp4JQbZFOG2OvcT4VaFLf33x3ksCMU",
+  authDomain: "money-diary-shiho.firebaseapp.com",
+  projectId: "money-diary-shiho",
+  storageBucket: "money-diary-shiho.firebasestorage.app",
+  messagingSenderId: "451841166772",
+  appId: "1:451841166772:web:ae42f1caf4ec46db3c36e1"
+};
+const ALLOWED_EMAIL = "k.family.sats@gmail.com";
 
+let auth = null, db = null;
+let currentUser = null;
+let firestoreUnsub = null;
+let isRemoteUpdate = false;
+
+if (typeof firebase !== 'undefined') {
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+  db = firebase.firestore();
+  db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+
+  auth.onAuthStateChanged(user => {
+    if (user && user.email === ALLOWED_EMAIL) {
+      currentUser = user;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appRoot').classList.add('ready');
+      subscribeToData();
+    } else if (user && user.email !== ALLOWED_EMAIL) {
+      auth.signOut();
+      document.getElementById('loginStatus').style.display = 'none';
+      const errEl = document.getElementById('loginError');
+      errEl.style.display = 'block';
+      errEl.textContent = 'このアカウントは登録されていません。しほ専用のGoogleアカウントでログインしてください。';
+    } else {
+      currentUser = null;
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('appRoot').classList.remove('ready');
+      document.getElementById('loginStatus').style.display = 'none';
+    }
+  });
+}
+
+function doLogin() {
+  if (!auth) { alert('Firebaseが読み込めていません。ネット接続を確認して再読み込みしてください。'); return; }
+  const provider = new firebase.auth.GoogleAuthProvider();
+  document.getElementById('loginError').style.display = 'none';
+  document.getElementById('loginStatus').style.display = 'block';
+  document.getElementById('loginStatus').textContent = 'ログイン中...';
+  auth.signInWithPopup(provider).catch(err => {
+    document.getElementById('loginStatus').style.display = 'none';
+    const errEl = document.getElementById('loginError');
+    errEl.style.display = 'block';
+    errEl.textContent = 'ログインに失敗しました: ' + (err.message || err.code || '不明なエラー');
+  });
+}
+function doLogout() {
+  if (!confirm('ログアウトしますか?')) return;
+  if (firestoreUnsub) firestoreUnsub();
+  if (auth) auth.signOut();
+}
+
+// ============== Data (Firestore同期) ==============
 let data = {
   partners: [], customers: [], suppliers: [], employees: [],
   loans: [], fixed: [], monthly: {}
@@ -1254,14 +1345,30 @@ function normalizeData() {
   });
 }
 
-function loadData() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    try {
-      data = JSON.parse(saved);
-    } catch(e) {}
-  }
-  normalizeData();
+function getDocRef() {
+  return db.collection('users').doc(currentUser.uid).collection('data').doc('main');
+}
+
+function subscribeToData() {
+  setSyncStatus('saving', '接続中');
+  if (firestoreUnsub) firestoreUnsub();
+  firestoreUnsub = getDocRef().onSnapshot(doc => {
+    isRemoteUpdate = true;
+    if (doc.exists) {
+      const remote = doc.data();
+      data = remote.payload ? JSON.parse(remote.payload) : data;
+    } else {
+      getDocRef().set({ payload: JSON.stringify(data), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+    normalizeData();
+    renderAll();
+    updateExportLabel();
+    setSyncStatus('synced', '同期済み');
+    isRemoteUpdate = false;
+  }, err => {
+    setSyncStatus('', 'エラー');
+    console.error('Firestore同期エラー:', err);
+  });
 }
 
 function setSyncStatus(state, label) {
@@ -1272,15 +1379,28 @@ function setSyncStatus(state, label) {
   lbl.textContent = label;
 }
 
+let saveTimer = null;
 function saveData() {
+  if (isRemoteUpdate) return;
+  if (!currentUser) return;
   setSyncStatus('saving', '保存中');
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    setSyncStatus('synced', '開発版(端末内)');
-  } catch(e) {
-    setSyncStatus('', '保存失敗');
-    alert('保存できませんでした。データ容量が上限に達したかも知れません。');
-  }
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    const payload = JSON.stringify(data);
+    if (payload.length > 900000) {
+      setSyncStatus('', '容量超過');
+      alert('データ容量がクラウド保存の上限に近づいています。手書きメモを整理するか、バックアップ書き出しをおすすめします。');
+    }
+    getDocRef().set({
+      payload,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      setSyncStatus('synced', '同期済み');
+    }).catch(err => {
+      setSyncStatus('', '保存失敗');
+      console.error('保存エラー:', err);
+    });
+  }, 500);
 }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
@@ -2760,6 +2880,177 @@ document.getElementById('confirmOk').addEventListener('click', () => {
   closeConfirm();
 });
 
+// ============== Excel出力 ==============
+let exportMode = 'fiscal';
+let exportYear = (new Date()).getFullYear();
+
+function setExportMode(mode) {
+  exportMode = mode;
+  updateExportLabel();
+}
+function changeExportYear(delta) {
+  exportYear += delta;
+  updateExportLabel();
+}
+function updateExportLabel() {
+  document.getElementById('exportModeFiscal').classList.toggle('active', exportMode === 'fiscal');
+  document.getElementById('exportModeCalendar').classList.toggle('active', exportMode === 'calendar');
+  const label = document.getElementById('exportYearLabel');
+  if (exportMode === 'fiscal') {
+    label.textContent = `${exportYear}年9月〜${exportYear + 1}年8月`;
+  } else {
+    label.textContent = `${exportYear}年（1〜12月）`;
+  }
+}
+function getExportMonths() {
+  const months = [];
+  if (exportMode === 'fiscal') {
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(exportYear, 8 + i, 1);
+      months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    }
+  } else {
+    for (let i = 0; i < 12; i++) {
+      months.push(`${exportYear}-${String(i + 1).padStart(2, '0')}`);
+    }
+  }
+  return months;
+}
+function monthShort(ym) {
+  const [y, m] = ym.split('-');
+  return `${y}/${parseInt(m)}`;
+}
+
+function exportToExcel() {
+  if (typeof XLSX === 'undefined') {
+    alert('Excelライブラリの読み込みに失敗しました。ネット接続を確認して再度お試しください。');
+    return;
+  }
+  const months = getExportMonths();
+  const wb = XLSX.utils.book_new();
+
+  // --- シート1：年間サマリー ---
+  const summaryData = [['項目', ...months.map(monthShort), '合計']];
+  const rowSales = ['売上'], rowPurchase = ['買掛'], rowSalary = ['給与'],
+        rowFixed = ['固定費'], rowLoan = ['融資返済'], rowProfit = ['差引利益'];
+  let tS=0, tP=0, tSa=0, tF=0, tL=0, tPr=0;
+  months.forEach(ym => {
+    const t = calcMonthTotals(ym);
+    const profit = t.sales - t.expense;
+    rowSales.push(t.sales); rowPurchase.push(t.purchases); rowSalary.push(t.salaries);
+    rowFixed.push(t.fixed); rowLoan.push(t.loanPay); rowProfit.push(profit);
+    tS+=t.sales; tP+=t.purchases; tSa+=t.salaries; tF+=t.fixed; tL+=t.loanPay; tPr+=profit;
+  });
+  rowSales.push(tS); rowPurchase.push(tP); rowSalary.push(tSa);
+  rowFixed.push(tF); rowLoan.push(tL); rowProfit.push(tPr);
+  summaryData.push(rowSales, rowPurchase, rowSalary, rowFixed, rowLoan, rowProfit);
+  const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+  wsSummary['!cols'] = [{wch:12}, ...months.map(()=>({wch:11})), {wch:13}];
+  XLSX.utils.book_append_sheet(wb, wsSummary, '年間サマリー');
+
+  // --- シート2：売上（取引先×月） ---
+  const salesData = [['取引先', ...months.map(monthShort), '合計']];
+  data.partners.forEach(p => {
+    const row = [p.name];
+    let sum = 0;
+    months.forEach(ym => {
+      const v = (data.monthly[ym] && data.monthly[ym].sales && data.monthly[ym].sales[p.id]) || 0;
+      row.push(v); sum += v;
+    });
+    row.push(sum);
+    salesData.push(row);
+  });
+  // 月合計行
+  const salesTotalRow = ['月合計'];
+  months.forEach(ym => salesTotalRow.push(calcMonthTotals(ym).sales));
+  salesTotalRow.push(tS);
+  salesData.push(salesTotalRow);
+  const wsSales = XLSX.utils.aoa_to_sheet(salesData);
+  wsSales['!cols'] = [{wch:20}, ...months.map(()=>({wch:11})), {wch:13}];
+  XLSX.utils.book_append_sheet(wb, wsSales, '売上');
+
+  // --- シート3：買掛（取引先×月） ---
+  const purchaseData = [['取引先', ...months.map(monthShort), '合計']];
+  data.partners.forEach(p => {
+    const row = [p.name];
+    let sum = 0;
+    months.forEach(ym => {
+      const v = (data.monthly[ym] && data.monthly[ym].purchases && data.monthly[ym].purchases[p.id]) || 0;
+      row.push(v); sum += v;
+    });
+    row.push(sum);
+    purchaseData.push(row);
+  });
+  const purchaseTotalRow = ['月合計'];
+  months.forEach(ym => purchaseTotalRow.push(calcMonthTotals(ym).purchases));
+  purchaseTotalRow.push(tP);
+  purchaseData.push(purchaseTotalRow);
+  const wsPurchase = XLSX.utils.aoa_to_sheet(purchaseData);
+  wsPurchase['!cols'] = [{wch:20}, ...months.map(()=>({wch:11})), {wch:13}];
+  XLSX.utils.book_append_sheet(wb, wsPurchase, '買掛');
+
+  // --- シート4：給与（社員×月） ---
+  const salaryData = [['社員', ...months.map(monthShort), '合計']];
+  data.employees.forEach(e => {
+    const row = [e.name];
+    let sum = 0;
+    months.forEach(ym => {
+      const v = (data.monthly[ym] && data.monthly[ym].salaries && data.monthly[ym].salaries[e.id]) || 0;
+      row.push(v); sum += v;
+    });
+    row.push(sum);
+    salaryData.push(row);
+  });
+  const salaryTotalRow = ['月合計'];
+  months.forEach(ym => salaryTotalRow.push(calcMonthTotals(ym).salaries));
+  salaryTotalRow.push(tSa);
+  salaryData.push(salaryTotalRow);
+  const wsSalary = XLSX.utils.aoa_to_sheet(salaryData);
+  wsSalary['!cols'] = [{wch:16}, ...months.map(()=>({wch:11})), {wch:13}];
+  XLSX.utils.book_append_sheet(wb, wsSalary, '給与');
+
+  // --- シート5：融資 ---
+  const loanData = [['借入先', '目的', '借入日', '借りた金額', '現在残高', '毎月返済', '引落日', '完済予定']];
+  data.loans.forEach(l => {
+    const po = calcPayoff(l);
+    loanData.push([
+      l.name, l.purpose || '', l.startDate || '',
+      l.initialAmount || 0, l.currentBalance || 0, l.monthlyPayment || 0,
+      l.paymentDay ? l.paymentDay + '日' : '', po.payoffLabel || ''
+    ]);
+  });
+  const wsLoan = XLSX.utils.aoa_to_sheet(loanData);
+  wsLoan['!cols'] = [{wch:20},{wch:14},{wch:12},{wch:13},{wch:13},{wch:12},{wch:8},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, wsLoan, '融資');
+
+  // --- シート6：固定費（月変動対応） ---
+  const fixedData = [['固定費', ...months.map(monthShort), '合計']];
+  data.fixed.forEach(f => {
+    const row = [f.name];
+    let sum = 0;
+    months.forEach(ym => {
+      const v = getFixedAmountForMonth(f, ym);
+      row.push(v); sum += v;
+    });
+    row.push(sum);
+    fixedData.push(row);
+  });
+  const fixedTotalRow = ['月合計'];
+  months.forEach(ym => fixedTotalRow.push(data.fixed.reduce((a,b)=>a+getFixedAmountForMonth(b,ym),0)));
+  fixedTotalRow.push(tF);
+  fixedData.push(fixedTotalRow);
+  const wsFixed = XLSX.utils.aoa_to_sheet(fixedData);
+  wsFixed['!cols'] = [{wch:20}, ...months.map(()=>({wch:11})), {wch:13}];
+  XLSX.utils.book_append_sheet(wb, wsFixed, '固定費');
+
+  // --- ファイル名 ---
+  const periodLabel = exportMode === 'fiscal'
+    ? `${exportYear}年度(9-8月)`
+    : `${exportYear}年(1-12月)`;
+  const filename = `経営ノート_${periodLabel}.xlsx`;
+  XLSX.writeFile(wb, filename);
+}
+
 function exportData() {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -2800,10 +3091,8 @@ function confirmReset() {
 }
 
 // 開発版：即座にローカルデータを読み込んで表示
-loadData();
-renderAll();
-setSyncStatus('synced', '開発版(端末内)');
-window.addEventListener('resize', () => renderChart());
+// データ読み込みは auth.onAuthStateChanged → subscribeToData() 経由
+window.addEventListener('resize', () => { if (currentUser) renderChart(); });
 </script>
 </body>
 </html>
