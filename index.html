@@ -8,26 +8,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Zen+Maru+Gothic:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<!-- 開発版：Firebase無効（ローカル保存のみ） -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-  /* ===== ログイン画面 ===== */
-  #loginScreen {
-    position: fixed; inset: 0;
-    background: var(--cream);
-    background-image:
-      radial-gradient(circle at 10% 20%, var(--peach-soft) 0%, transparent 35%),
-      radial-gradient(circle at 90% 80%, var(--pink-soft) 0%, transparent 35%);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 999;
-    flex-direction: column;
-    padding: 20px;
-    text-align: center;
-  }
-  #appRoot { display: none; }
-  #appRoot.ready { display: block; }
+  #loginScreen { display: none !important; }
+  #appRoot { display: block !important; }
   #loginScreen .login-logo {
     font-family: 'Fraunces', serif;
     font-style: italic;
@@ -972,6 +957,7 @@
     <span class="heart">♥</span>
     <span style="font-style: italic;">Money Diary</span>
     <span class="sub">KEIEI</span>
+    <span class="sub" style="background: var(--orange); margin-left: 4px;">DEV</span>
   </div>
   <div class="header-right">
     <div class="sync-badge"><span class="sync-dot" id="syncDot"></span><span id="syncLabel">-</span></div>
@@ -980,7 +966,7 @@
       <div class="ym-display" id="ymDisplay">2026.5</div>
       <button onclick="changeMonth(1)">›</button>
     </div>
-    <button id="logoutBtn" onclick="doLogout()" title="ログアウト">⏻</button>
+    <button id="logoutBtn" onclick="doLogout()" title="ログアウト" style="display:none;">⏻</button>
   </div>
 </header>
 
@@ -1140,34 +1126,34 @@
   <section class="view" id="view-master">
     <div class="master-section s1">
       <h3>取引先 / Partners</h3>
-      <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px;">売上（仕事をもらう）も買掛（仕事をあげる）も、同じ取引先に記録できます。追加後、詳細ボタンで住所・連絡先・担当者を登録できます</p>
+      <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px;">売上（仕事をもらう）も買掛（仕事をあげる）も、同じ取引先に記録できます。追加後、一覧から詳細を編集できます</p>
       <div class="input-row">
         <input type="text" id="newPartner" placeholder="例：東京エレクトロン">
         <button class="btn" onclick="addMaster('partners')">追加 +</button>
       </div>
-      <div class="master-list" id="partnerList"></div>
+      <button class="btn btn-soft" style="width:100%; margin-top:6px;" onclick="openListModal('partners')" id="partnerCountBtn">📋 一覧・編集を見る</button>
     </div>
 
     <div class="master-section s3">
       <h3>社員 / Staff <span class="auto-tag">10名まで</span></h3>
-      <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px;">名前を入れて追加後、詳細ボタンでプロフィール入力できます</p>
+      <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px;">名前を入れて追加後、一覧からプロフィールを編集できます</p>
       <div class="input-row">
         <input type="text" id="newEmployee" placeholder="例：山田 太郎">
         <button class="btn" onclick="addMaster('employees')">追加 +</button>
       </div>
-      <div class="master-list" id="employeeList"></div>
+      <button class="btn btn-soft" style="width:100%; margin-top:6px;" onclick="openListModal('employees')" id="employeeCountBtn">📋 一覧・編集を見る</button>
     </div>
 
     <div class="master-section s4">
       <h3>融資 / Loans</h3>
-      <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px;">追加後、詳細ボタンで支払履歴や金利を記録できます</p>
+      <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px;">追加後、一覧または融資タブから支払履歴や金利を記録できます</p>
       <div class="input-row" style="flex-wrap: wrap;">
         <input type="text" id="newLoanName" placeholder="借入先名（例：日本政策金融公庫）" style="flex: 1 1 100%;">
         <input type="number" id="newLoanBalance" placeholder="借りた金額（円）" inputmode="numeric">
         <input type="number" id="newLoanPayment" placeholder="毎月返済額（円）" inputmode="numeric">
         <button class="btn" onclick="addLoan()">追加 +</button>
       </div>
-      <div class="master-list" id="loanList"></div>
+      <button class="btn btn-soft" style="width:100%; margin-top:6px;" onclick="openListModal('loans')" id="loanCountBtn">📋 一覧・編集を見る</button>
     </div>
 
     <div class="master-section s5">
@@ -1177,7 +1163,7 @@
         <input type="number" id="newFixedAmount" placeholder="金額" inputmode="numeric" style="flex: 1;">
         <button class="btn" onclick="addFixed()">追加 +</button>
       </div>
-      <div class="master-list" id="fixedMasterList"></div>
+      <button class="btn btn-soft" style="width:100%; margin-top:6px;" onclick="openListModal('fixed')" id="fixedCountBtn">📋 一覧・編集を見る</button>
     </div>
 
     <div class="master-section s5">
@@ -1231,69 +1217,10 @@
 </div><!-- /#appRoot -->
 
 <script>
-// ============== Firebase ==============
-const firebaseConfig = {
-  apiKey: "AIzaSyB2Jcp4JQbZFOG2OvcT4VaFLf33x3ksCMU",
-  authDomain: "money-diary-shiho.firebaseapp.com",
-  projectId: "money-diary-shiho",
-  storageBucket: "money-diary-shiho.firebasestorage.app",
-  messagingSenderId: "451841166772",
-  appId: "1:451841166772:web:ae42f1caf4ec46db3c36e1"
-};
-const ALLOWED_EMAIL = "k.family.sats@gmail.com";
+// ============== Data (開発版：ローカル保存のみ、Firebase無効) ==============
+const STORAGE_KEY = 'keiei_note_data_dev_v1';
+let currentUser = { uid: 'dev-local' }; // 開発版はログイン不要
 
-let auth = null, db = null;
-let currentUser = null;
-let firestoreUnsub = null;
-let isRemoteUpdate = false;
-
-if (typeof firebase !== 'undefined') {
-  firebase.initializeApp(firebaseConfig);
-  auth = firebase.auth();
-  db = firebase.firestore();
-  db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
-
-  auth.onAuthStateChanged(user => {
-    if (user && user.email === ALLOWED_EMAIL) {
-      currentUser = user;
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('appRoot').classList.add('ready');
-      subscribeToData();
-    } else if (user && user.email !== ALLOWED_EMAIL) {
-      auth.signOut();
-      document.getElementById('loginStatus').style.display = 'none';
-      const errEl = document.getElementById('loginError');
-      errEl.style.display = 'block';
-      errEl.textContent = 'このアカウントは登録されていません。しほ専用のGoogleアカウントでログインしてください。';
-    } else {
-      currentUser = null;
-      document.getElementById('loginScreen').style.display = 'flex';
-      document.getElementById('appRoot').classList.remove('ready');
-      document.getElementById('loginStatus').style.display = 'none';
-    }
-  });
-}
-
-function doLogin() {
-  if (!auth) { alert('Firebaseが読み込めていません。ネット接続を確認して再読み込みしてください。'); return; }
-  const provider = new firebase.auth.GoogleAuthProvider();
-  document.getElementById('loginError').style.display = 'none';
-  document.getElementById('loginStatus').style.display = 'block';
-  document.getElementById('loginStatus').textContent = 'ログイン中...';
-  auth.signInWithPopup(provider).catch(err => {
-    document.getElementById('loginStatus').style.display = 'none';
-    const errEl = document.getElementById('loginError');
-    errEl.style.display = 'block';
-    errEl.textContent = 'ログインに失敗しました: ' + (err.message || err.code || '不明なエラー');
-  });
-}
-function doLogout() {
-  if (!confirm('ログアウトしますか?')) return;
-  if (firestoreUnsub) firestoreUnsub();
-  if (auth) auth.signOut();
-}
-
-// ============== Data (Firestore同期) ==============
 let data = {
   partners: [], customers: [], suppliers: [], employees: [],
   loans: [], fixed: [], monthly: {}
@@ -1345,30 +1272,14 @@ function normalizeData() {
   });
 }
 
-function getDocRef() {
-  return db.collection('users').doc(currentUser.uid).collection('data').doc('main');
-}
-
-function subscribeToData() {
-  setSyncStatus('saving', '接続中');
-  if (firestoreUnsub) firestoreUnsub();
-  firestoreUnsub = getDocRef().onSnapshot(doc => {
-    isRemoteUpdate = true;
-    if (doc.exists) {
-      const remote = doc.data();
-      data = remote.payload ? JSON.parse(remote.payload) : data;
-    } else {
-      getDocRef().set({ payload: JSON.stringify(data), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-    }
-    normalizeData();
-    renderAll();
-    updateExportLabel();
-    setSyncStatus('synced', '同期済み');
-    isRemoteUpdate = false;
-  }, err => {
-    setSyncStatus('', 'エラー');
-    console.error('Firestore同期エラー:', err);
-  });
+function loadData() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      data = JSON.parse(saved);
+    } catch(e) {}
+  }
+  normalizeData();
 }
 
 function setSyncStatus(state, label) {
@@ -1379,28 +1290,15 @@ function setSyncStatus(state, label) {
   lbl.textContent = label;
 }
 
-let saveTimer = null;
 function saveData() {
-  if (isRemoteUpdate) return;
-  if (!currentUser) return;
   setSyncStatus('saving', '保存中');
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    const payload = JSON.stringify(data);
-    if (payload.length > 900000) {
-      setSyncStatus('', '容量超過');
-      alert('データ容量がクラウド保存の上限に近づいています。手書きメモを整理するか、バックアップ書き出しをおすすめします。');
-    }
-    getDocRef().set({
-      payload,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-      setSyncStatus('synced', '同期済み');
-    }).catch(err => {
-      setSyncStatus('', '保存失敗');
-      console.error('保存エラー:', err);
-    });
-  }, 500);
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    setSyncStatus('synced', '開発版(端末内)');
+  } catch(e) {
+    setSyncStatus('', '保存失敗');
+    alert('保存できませんでした。データ容量が上限に達したかも知れません。');
+  }
 }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
@@ -2106,40 +2004,109 @@ function renderFixedView() {
 }
 
 function renderMaster() {
-  const emptyMsg = '<div style="color: var(--ink-light); font-size: 13px; padding: 8px 0;">まだありません</div>';
+  // 各カテゴリの件数をボタンに反映
+  const setCount = (btnId, count, label) => {
+    const btn = document.getElementById(btnId);
+    if (btn) btn.textContent = `📋 一覧・編集を見る（${count}${label}）`;
+  };
+  setCount('partnerCountBtn', data.partners.length, '件');
+  setCount('employeeCountBtn', data.employees.length, '名');
+  setCount('loanCountBtn', data.loans.length, '件');
+  setCount('fixedCountBtn', data.fixed.length, '件');
+  // 一覧モーダルが開いていたら再描画
+  if (currentListModalType) renderListModalItems();
+}
 
-  document.getElementById('partnerList').innerHTML = data.partners.length === 0 ? emptyMsg
-    : data.partners.map(c => `
-        <div class="master-item">
-          <div class="name">${escapeHtml(c.name)} ${(c.memo || c.drawing || (c.contacts && c.contacts.length)) ? '<span style="font-size:11px;color:var(--blue);">📝</span>' : ''}</div>
-          <button class="btn-detail btn-sm" onclick="openPartnerLedger('${c.id}')">📊 取引</button>
-          <button class="btn-detail btn-sm" onclick="openPartnerDetail('partners', '${c.id}')">📝 編集</button>
-          <button class="btn btn-danger" onclick="removeMaster('partners', '${c.id}')">削除</button>
-        </div>`).join('');
+// ============== 一覧・編集モーダル ==============
+let currentListModalType = null;
+let listModalSearch = '';
 
-  document.getElementById('employeeList').innerHTML = data.employees.length === 0 ? emptyMsg
-    : data.employees.map(e => `
-        <div class="master-item">
-          <div class="name">${escapeHtml(e.name)}</div>
-          <button class="btn-detail btn-sm" onclick="openEmployeeDetail('${e.id}')">プロフィール</button>
-          <button class="btn btn-danger" onclick="removeMaster('employees', '${e.id}')">削除</button>
-        </div>`).join('');
+function openListModal(type) {
+  currentListModalType = type;
+  listModalSearch = '';
+  const titles = {
+    partners: '取引先の一覧',
+    employees: '社員の一覧',
+    loans: '融資の一覧',
+    fixed: '固定費の一覧'
+  };
+  const showSearch = (type === 'partners'); // 件数が多くなる取引先だけ検索窓
+  openDetailModal(`
+    <h3>📋 ${titles[type]}</h3>
+    ${showSearch ? `
+      <div style="margin-bottom: 14px;">
+        <input type="text" id="listSearchInput" placeholder="🔍 名前で検索（半角・全角どちらでもOK）"
+               oninput="onListSearch(this.value)" style="width:100%;">
+      </div>` : ''}
+    <div id="listModalItems"></div>
+    <div class="modal-actions">
+      <button class="btn btn-soft" onclick="closeListModal()">閉じる</button>
+    </div>
+  `);
+  renderListModalItems();
+}
+function closeListModal() {
+  currentListModalType = null;
+  listModalSearch = '';
+  closeDetailModal();
+}
+function onListSearch(val) {
+  listModalSearch = val;
+  renderListModalItems();
+}
+function renderListModalItems() {
+  const container = document.getElementById('listModalItems');
+  if (!container || !currentListModalType) return;
+  const type = currentListModalType;
+  const q = normalizeForSearch(listModalSearch);
 
-  document.getElementById('loanList').innerHTML = data.loans.length === 0 ? emptyMsg
-    : data.loans.map(l => `
-        <div class="master-item">
-          <div class="name">${escapeHtml(l.name)}</div>
-          <div class="meta">借${yen(l.initialAmount || l.currentBalance)}/残${yen(l.currentBalance)}/月${yen(l.monthlyPayment)}</div>
-          <button class="btn btn-danger" onclick="removeLoan('${l.id}')">削除</button>
-        </div>`).join('');
-
-  document.getElementById('fixedMasterList').innerHTML = data.fixed.length === 0 ? emptyMsg
-    : data.fixed.map(f => `
-        <div class="master-item">
-          <div class="name">${escapeHtml(f.name)}</div>
-          <div class="meta">${yen(f.amount)}/月</div>
-          <button class="btn btn-danger" onclick="removeFixed('${f.id}')">削除</button>
-        </div>`).join('');
+  let items = [];
+  if (type === 'partners') {
+    items = data.partners.filter(p => !q || normalizeForSearch(p.name).includes(q));
+    container.innerHTML = renderListRows(items, p => `
+      <div class="master-item">
+        <div class="name">${escapeHtml(p.name)} ${(p.memo || p.drawing || (p.contacts && p.contacts.length)) ? '<span style="font-size:11px;color:var(--blue);">📝</span>' : ''}</div>
+        <button class="btn-detail btn-sm" onclick="openPartnerLedger('${p.id}')">📊 取引</button>
+        <button class="btn-detail btn-sm" onclick="openPartnerDetail('partners', '${p.id}')">📝 編集</button>
+        <button class="btn btn-danger" onclick="removeMaster('partners', '${p.id}')">削除</button>
+      </div>`, data.partners.length);
+  } else if (type === 'employees') {
+    items = data.employees.filter(e => !q || normalizeForSearch(e.name).includes(q));
+    container.innerHTML = renderListRows(items, e => `
+      <div class="master-item">
+        <div class="name">${escapeHtml(e.name)}</div>
+        <button class="btn-detail btn-sm" onclick="openEmployeeDetail('${e.id}')">プロフィール</button>
+        <button class="btn btn-danger" onclick="removeMaster('employees', '${e.id}')">削除</button>
+      </div>`, data.employees.length);
+  } else if (type === 'loans') {
+    items = data.loans.filter(l => !q || normalizeForSearch(l.name).includes(q));
+    container.innerHTML = renderListRows(items, l => `
+      <div class="master-item">
+        <div class="name">${escapeHtml(l.name)}</div>
+        <div class="meta">借${yen(l.initialAmount || l.currentBalance)}/残${yen(l.currentBalance)}/月${yen(l.monthlyPayment)}</div>
+        <button class="btn-detail btn-sm" onclick="openLoanDetail('${l.id}')">📝 編集</button>
+        <button class="btn btn-danger" onclick="removeLoan('${l.id}')">削除</button>
+      </div>`, data.loans.length);
+  } else if (type === 'fixed') {
+    items = data.fixed.filter(f => !q || normalizeForSearch(f.name).includes(q));
+    container.innerHTML = renderListRows(items, f => `
+      <div class="master-item">
+        <div class="name">${escapeHtml(f.name)}</div>
+        <div class="meta">${yen(f.amount)}/月</div>
+        <button class="btn-detail btn-sm" onclick="openFixedDetail('${f.id}')">📝 編集</button>
+        <button class="btn btn-danger" onclick="removeFixed('${f.id}')">削除</button>
+      </div>`, data.fixed.length);
+  }
+}
+function renderListRows(items, rowFn, totalCount) {
+  if (totalCount === 0) {
+    return '<div class="empty" style="background:white;">まだ登録がありません</div>';
+  }
+  if (items.length === 0) {
+    return '<div style="text-align:center; padding:24px; color:var(--ink-light);">🔍 検索に一致する項目がありません</div>';
+  }
+  return `<div style="max-height: 50vh; overflow-y: auto;">${items.map(rowFn).join('')}</div>
+    <div style="font-size:11px; color:var(--ink-light); text-align:right; margin-top:8px;">${items.length}件表示</div>`;
 }
 
 // ============== Monthly Memo ==============
@@ -2296,6 +2263,7 @@ function openDetailModal(html) {
 }
 function closeDetailModal() {
   document.getElementById('detailModal').classList.remove('show');
+  currentListModalType = null; // 一覧モードも解除
   // データ保存
   saveData();
 }
@@ -2865,6 +2833,31 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 
+// 検索用の正規化：全角→半角、カタカナ→ひらがな、小文字化
+function normalizeForSearch(s) {
+  if (!s) return '';
+  let t = String(s);
+  // 全角英数記号 → 半角
+  t = t.replace(/[Ａ-Ｚａ-ｚ０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
+  // 半角カタカナ → 全角カタカナ（簡易）
+  const hankakuKana = {
+    'ｶﾞ':'ガ','ｷﾞ':'ギ','ｸﾞ':'グ','ｹﾞ':'ゲ','ｺﾞ':'ゴ','ｻﾞ':'ザ','ｼﾞ':'ジ','ｽﾞ':'ズ','ｾﾞ':'ゼ','ｿﾞ':'ゾ',
+    'ﾀﾞ':'ダ','ﾁﾞ':'ヂ','ﾂﾞ':'ヅ','ﾃﾞ':'デ','ﾄﾞ':'ド','ﾊﾞ':'バ','ﾋﾞ':'ビ','ﾌﾞ':'ブ','ﾍﾞ':'ベ','ﾎﾞ':'ボ',
+    'ﾊﾟ':'パ','ﾋﾟ':'ピ','ﾌﾟ':'プ','ﾍﾟ':'ペ','ﾎﾟ':'ポ',
+    'ｱ':'ア','ｲ':'イ','ｳ':'ウ','ｴ':'エ','ｵ':'オ','ｶ':'カ','ｷ':'キ','ｸ':'ク','ｹ':'ケ','ｺ':'コ',
+    'ｻ':'サ','ｼ':'シ','ｽ':'ス','ｾ':'セ','ｿ':'ソ','ﾀ':'タ','ﾁ':'チ','ﾂ':'ツ','ﾃ':'テ','ﾄ':'ト',
+    'ﾅ':'ナ','ﾆ':'ニ','ﾇ':'ヌ','ﾈ':'ネ','ﾉ':'ノ','ﾊ':'ハ','ﾋ':'ヒ','ﾌ':'フ','ﾍ':'ヘ','ﾎ':'ホ',
+    'ﾏ':'マ','ﾐ':'ミ','ﾑ':'ム','ﾒ':'メ','ﾓ':'モ','ﾔ':'ヤ','ﾕ':'ユ','ﾖ':'ヨ',
+    'ﾗ':'ラ','ﾘ':'リ','ﾙ':'ル','ﾚ':'レ','ﾛ':'ロ','ﾜ':'ワ','ｦ':'ヲ','ﾝ':'ン',
+    'ｧ':'ァ','ｨ':'ィ','ｩ':'ゥ','ｪ':'ェ','ｫ':'ォ','ｬ':'ャ','ｭ':'ュ','ｮ':'ョ','ｯ':'ッ','ｰ':'ー'
+  };
+  t = t.replace(/ｶﾞ|ｷﾞ|ｸﾞ|ｹﾞ|ｺﾞ|ｻﾞ|ｼﾞ|ｽﾞ|ｾﾞ|ｿﾞ|ﾀﾞ|ﾁﾞ|ﾂﾞ|ﾃﾞ|ﾄﾞ|ﾊﾞ|ﾋﾞ|ﾌﾞ|ﾍﾞ|ﾎﾞ|ﾊﾟ|ﾋﾟ|ﾌﾟ|ﾍﾟ|ﾎﾟ|[ｱ-ﾝｦｧ-ｯｰ]/g, m => hankakuKana[m] || m);
+  // カタカナ → ひらがな
+  t = t.replace(/[\u30A1-\u30F6]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+  // 小文字化・空白除去
+  return t.toLowerCase().replace(/\s+/g, '');
+}
+
 let pendingDelete = null;
 function showConfirm(title, message) {
   document.getElementById('confirmTitle').textContent = title;
@@ -3091,8 +3084,11 @@ function confirmReset() {
 }
 
 // 開発版：即座にローカルデータを読み込んで表示
-// データ読み込みは auth.onAuthStateChanged → subscribeToData() 経由
-window.addEventListener('resize', () => { if (currentUser) renderChart(); });
+loadData();
+renderAll();
+updateExportLabel();
+setSyncStatus('synced', '開発版(端末内)');
+window.addEventListener('resize', () => renderChart());
 </script>
 </body>
 </html>
