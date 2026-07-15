@@ -8,23 +8,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Zen+Maru+Gothic:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<!-- 開発版：Firebase無効（ローカル保存のみ） -->
 <style>
-  /* ===== ログイン画面 ===== */
-  #loginScreen {
-    position: fixed; inset: 0;
-    background: var(--cream);
-    background-image:
-      radial-gradient(circle at 10% 20%, var(--peach-soft) 0%, transparent 35%),
-      radial-gradient(circle at 90% 80%, var(--pink-soft) 0%, transparent 35%);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 999;
-    flex-direction: column;
-    padding: 20px;
-    text-align: center;
-  }
+  #loginScreen { display: none !important; }
+  #appRoot { display: block !important; }
   #loginScreen .login-logo {
     font-family: 'Fraunces', serif;
     font-style: italic;
@@ -125,8 +112,8 @@
     background-attachment: fixed;
     color: var(--ink);
     font-family: 'Zen Maru Gothic', -apple-system, "Hiragino Sans", sans-serif;
-    font-size: 15px;
-    line-height: 1.6;
+    font-size: 17px;
+    line-height: 1.7;
     overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
   }
@@ -236,6 +223,27 @@
     box-shadow: 3px 3px 0 var(--ink);
   }
 
+  /* 年間ビュー内の切替ボタン（メインタブとは別物） */
+  .subtab {
+    background: white;
+    border: 2px solid var(--ink);
+    padding: 11px 16px;
+    font-size: 14px;
+    color: var(--ink);
+    cursor: pointer;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: 600;
+    border-radius: 12px;
+    box-shadow: 2px 2px 0 var(--pink);
+  }
+  .subtab:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--pink); }
+  .subtab.active {
+    background: var(--orange);
+    color: var(--ink);
+    font-weight: 700;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
   main { padding: 20px; max-width: 1100px; margin: 0 auto; }
   .view { display: none; }
   .view.active { display: block; animation: popIn .35s cubic-bezier(.34,1.56,.64,1); }
@@ -247,7 +255,7 @@
   h2 {
     font-family: 'Fraunces', serif;
     font-style: italic;
-    font-size: 17px;
+    font-size: 20px;
     color: var(--ink);
     margin: 0 0 14px;
     font-weight: 600;
@@ -256,7 +264,7 @@
   h2::before {
     content: '✿';
     color: var(--red);
-    font-size: 18px;
+    font-size: 21px;
     font-style: normal;
   }
 
@@ -339,19 +347,19 @@
   .stat-label {
     font-family: 'Fraunces', serif;
     font-style: italic;
-    font-size: 12px;
+    font-size: 13px;
     color: var(--ink);
     margin-bottom: 6px;
-    font-weight: 600;
+    font-weight: 700;
   }
   .stat-value {
     font-family: 'DM Mono', monospace;
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 500;
     color: var(--ink);
   }
-  .stat-value .yen { font-size: 13px; margin-left: 2px; opacity: 0.7; }
-  .stat-sub { font-size: 11px; color: var(--ink-soft); margin-top: 4px; font-weight: 500; }
+  .stat-value .yen { font-size: 14px; margin-left: 2px; opacity: 0.7; }
+  .stat-sub { font-size: 12px; color: var(--ink-soft); margin-top: 4px; font-weight: 600; }
 
   .breakdown {
     background: white;
@@ -368,12 +376,12 @@
   }
   .breakdown-row:last-child { border-bottom: none; }
   .breakdown-row .lbl {
-    width: 100px; font-size: 13px; color: var(--ink); font-weight: 600;
+    width: 100px; font-size: 15px; color: var(--ink); font-weight: 700;
   }
   .breakdown-row .bar-wrap {
-    flex: 1; height: 12px;
+    flex: 1; height: 14px;
     background: var(--peach-soft);
-    border-radius: 6px;
+    border-radius: 7px;
     overflow: hidden;
     margin: 0 12px;
     border: 1.5px solid var(--ink);
@@ -383,9 +391,9 @@
     border-right: 1.5px solid var(--ink);
   }
   .breakdown-row .val {
-    width: 110px; text-align: right;
+    width: 120px; text-align: right;
     font-family: 'DM Mono', monospace;
-    font-size: 14px; font-weight: 500;
+    font-size: 17px; font-weight: 700;
   }
 
   .input-row {
@@ -456,21 +464,22 @@
     box-shadow: 2px 2px 0 var(--red);
   }
   .btn-detail {
-    background: var(--pink);
-    color: var(--ink);
+    background: var(--blue-bright);
+    color: white;
     border: 2px solid var(--ink);
-    padding: 6px 12px;
-    font-size: 12px;
+    padding: 8px 16px;
+    font-size: 13px;
     border-radius: 999px;
     font-weight: 700;
     box-shadow: 2px 2px 0 var(--ink);
     cursor: pointer;
     font-family: 'Zen Maru Gothic', sans-serif;
+    white-space: nowrap;
   }
   .btn-detail:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--ink); }
   .btn-sm {
     padding: 7px 14px;
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .entry-list { margin-top: 8px; }
@@ -481,9 +490,15 @@
   }
   .entry-item:last-child { border-bottom: none; }
   .entry-name {
-    flex: 1; font-size: 15px;
-    color: var(--ink); font-weight: 500;
+    flex: 1; font-size: 16px;
+    color: var(--ink); font-weight: 600;
   }
+  .entry-name-link {
+    cursor: pointer;
+    color: var(--ink);
+    transition: color .15s;
+  }
+  .entry-name-link:active { color: var(--blue); }
   .entry-amount {
     width: 140px;
     padding: 10px 12px;
@@ -572,14 +587,14 @@
     border-bottom: 1.5px dashed var(--line-strong);
   }
   .master-item:last-child { border-bottom: none; }
-  .master-item .name { flex: 1; font-size: 14px; font-weight: 500; }
+  .master-item .name { flex: 1; font-size: 16px; font-weight: 600; }
   .master-item .meta {
     font-family: 'DM Mono', monospace;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--ink-soft);
     margin-right: 8px;
     background: var(--peach-soft);
-    padding: 3px 8px;
+    padding: 4px 9px;
     border-radius: 8px;
     border: 1.5px solid var(--line-strong);
   }
@@ -617,6 +632,46 @@
   }
   .loan-body {
     display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+  }
+  .loan-remain {
+    background: var(--blue);
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin: 12px 0;
+    color: white;
+    text-align: center;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .loan-current-balance {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: var(--cream);
+    border: 1.5px dashed var(--line-strong);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+  }
+  .loan-remain-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    opacity: 0.9;
+    margin-bottom: 2px;
+  }
+  .loan-remain-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 30px;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .loan-remain-date {
+    font-size: 12px;
+    opacity: 0.9;
+    margin-top: 4px;
   }
   .loan-meta {
     font-size: 12px;
@@ -901,6 +956,7 @@
     <span class="heart">♥</span>
     <span style="font-style: italic;">Money Diary</span>
     <span class="sub">KEIEI</span>
+    <span class="sub" style="background: var(--orange); margin-left: 4px;">DEV</span>
   </div>
   <div class="header-right">
     <div class="sync-badge"><span class="sync-dot" id="syncDot"></span><span id="syncLabel">-</span></div>
@@ -909,14 +965,16 @@
       <div class="ym-display" id="ymDisplay">2026.5</div>
       <button onclick="changeMonth(1)">›</button>
     </div>
-    <button id="logoutBtn" onclick="doLogout()" title="ログアウト">⏻</button>
+    <button id="logoutBtn" onclick="doLogout()" title="ログアウト" style="display:none;">⏻</button>
   </div>
 </header>
 
 <nav class="tabs">
   <button class="tab active" data-view="dashboard">✨ Home</button>
   <button class="tab" data-view="sales">💖 売上</button>
+  <button class="tab" data-view="annual">📅 年間売上</button>
   <button class="tab" data-view="purchase">🌸 買掛</button>
+  <button class="tab" data-view="annual-purchase">📋 年間買掛</button>
   <button class="tab" data-view="salary">🎀 給与</button>
   <button class="tab" data-view="loan">🍊 融資</button>
   <button class="tab" data-view="fixed">🫧 固定費</button>
@@ -971,12 +1029,48 @@
     </div>
   </section>
 
+  <!-- Annual Sales -->
+  <section class="view" id="view-annual">
+    <div class="card">
+      <h2>年間売上</h2>
+      <div class="input-row" style="gap: 8px; margin-bottom: 4px;">
+        <button class="subtab active" id="annualTabFiscal" onclick="setAnnualMode('fiscal')" style="flex:1; text-align:center;">🏢 事業年度（9月〜8月）</button>
+        <button class="subtab" id="annualTabCalendar" onclick="setAnnualMode('calendar')" style="flex:1; text-align:center;">📆 暦年（1月〜12月）</button>
+      </div>
+      <div class="ym-picker" style="margin: 10px 0; justify-content: center; display: inline-flex;">
+        <button onclick="changeAnnualYear(-1)">‹</button>
+        <div class="ym-display" id="annualYearLabel">-</div>
+        <button onclick="changeAnnualYear(1)">›</button>
+      </div>
+      <div id="annualTable" class="entry-list"></div>
+      <div class="total-row"><div class="name">年間合計 ♡</div><div class="val" id="annualTotal">¥0</div></div>
+    </div>
+  </section>
+
   <!-- Purchase -->
   <section class="view" id="view-purchase">
     <div class="card">
       <h2 id="purchaseMonthLabel">今月の買掛・支払</h2>
       <div id="purchaseList" class="entry-list"></div>
       <div class="total-row"><div class="name">Total ♡</div><div class="val" id="purchaseTotal">¥0</div></div>
+    </div>
+  </section>
+
+  <!-- Annual Purchase -->
+  <section class="view" id="view-annual-purchase">
+    <div class="card">
+      <h2>年間買掛</h2>
+      <div class="input-row" style="gap: 8px; margin-bottom: 4px;">
+        <button class="subtab active" id="annualPurchaseTabFiscal" onclick="setAnnualPurchaseMode('fiscal')" style="flex:1; text-align:center;">🏢 事業年度（9月〜8月）</button>
+        <button class="subtab" id="annualPurchaseTabCalendar" onclick="setAnnualPurchaseMode('calendar')" style="flex:1; text-align:center;">📆 暦年（1月〜12月）</button>
+      </div>
+      <div class="ym-picker" style="margin: 10px 0; justify-content: center; display: inline-flex;">
+        <button onclick="changeAnnualPurchaseYear(-1)">‹</button>
+        <div class="ym-display" id="annualPurchaseYearLabel">-</div>
+        <button onclick="changeAnnualPurchaseYear(1)">›</button>
+      </div>
+      <div id="annualPurchaseTable" class="entry-list"></div>
+      <div class="total-row"><div class="name">年間合計 ♡</div><div class="val" id="annualPurchaseTotal">¥0</div></div>
     </div>
   </section>
 
@@ -1002,10 +1096,11 @@
   <!-- Fixed -->
   <section class="view" id="view-fixed">
     <div class="card">
-      <h2>固定費 <span class="auto-tag">AUTO ✨</span></h2>
-      <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px;">毎月自動で計上されます。詳細でメモと手書きが残せます。</p>
+      <h2 id="fixedMonthLabel">固定費</h2>
+      <p style="font-size: 13px; color: var(--ink-soft); margin: 0 0 4px;">✿ 金額は<strong>その月だけ</strong>変更できます（水道・電気など変動費に便利）</p>
+      <p style="font-size: 12px; color: var(--ink-light); margin: 0 0 14px;">変更するとその月に📌が付きます。詳細でメモ・手書きも残せます。</p>
       <div id="fixedList"></div>
-      <div class="total-row"><div class="name">月額合計 ♡</div><div class="val" id="fixedTotal">¥0</div></div>
+      <div class="total-row"><div class="name">今月の合計 ♡</div><div class="val" id="fixedTotal">¥0</div></div>
     </div>
   </section>
 
@@ -1029,21 +1124,13 @@
   <!-- Master -->
   <section class="view" id="view-master">
     <div class="master-section s1">
-      <h3>得意先 / Customers</h3>
+      <h3>取引先 / Partners</h3>
+      <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px;">売上（仕事をもらう）も買掛（仕事をあげる）も、同じ取引先に記録できます。追加後、詳細ボタンで住所・連絡先・担当者を登録できます</p>
       <div class="input-row">
-        <input type="text" id="newCustomer" placeholder="例：東京エレクトロン">
-        <button class="btn" onclick="addMaster('customers')">追加 +</button>
+        <input type="text" id="newPartner" placeholder="例：東京エレクトロン">
+        <button class="btn" onclick="addMaster('partners')">追加 +</button>
       </div>
-      <div class="master-list" id="customerList"></div>
-    </div>
-
-    <div class="master-section s2">
-      <h3>仕入先・外注先 / Suppliers</h3>
-      <div class="input-row">
-        <input type="text" id="newSupplier" placeholder="例：◯◯鋼材">
-        <button class="btn" onclick="addMaster('suppliers')">追加 +</button>
-      </div>
-      <div class="master-list" id="supplierList"></div>
+      <div class="master-list" id="partnerList"></div>
     </div>
 
     <div class="master-section s3">
@@ -1061,7 +1148,7 @@
       <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px;">追加後、詳細ボタンで支払履歴や金利を記録できます</p>
       <div class="input-row" style="flex-wrap: wrap;">
         <input type="text" id="newLoanName" placeholder="借入先名（例：日本政策金融公庫）" style="flex: 1 1 100%;">
-        <input type="number" id="newLoanBalance" placeholder="現在の残高（円）" inputmode="numeric">
+        <input type="number" id="newLoanBalance" placeholder="借りた金額（円）" inputmode="numeric">
         <input type="number" id="newLoanPayment" placeholder="毎月返済額（円）" inputmode="numeric">
         <button class="btn" onclick="addLoan()">追加 +</button>
       </div>
@@ -1112,74 +1199,38 @@
 </div><!-- /#appRoot -->
 
 <script>
-// ============== Firebase ==============
-const firebaseConfig = {
-  apiKey: "AIzaSyB2Jcp4JQbZFOG2OvcT4VaFLf33x3ksCMU",
-  authDomain: "money-diary-shiho.firebaseapp.com",
-  projectId: "money-diary-shiho",
-  storageBucket: "money-diary-shiho.firebasestorage.app",
-  messagingSenderId: "451841166772",
-  appId: "1:451841166772:web:ae42f1caf4ec46db3c36e1"
-};
-const ALLOWED_EMAIL = "k.family.sats@gmail.com";
+// ============== Data (開発版：ローカル保存のみ、Firebase無効) ==============
+const STORAGE_KEY = 'keiei_note_data_dev_v1';
+let currentUser = { uid: 'dev-local' }; // 開発版はログイン不要
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
-
-let currentUser = null;
-let firestoreUnsub = null;
-let isRemoteUpdate = false; // onSnapshotからの反映中はローカル保存をスキップ
-
-function doLogin() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  document.getElementById('loginError').style.display = 'none';
-  document.getElementById('loginStatus').style.display = 'block';
-  document.getElementById('loginStatus').textContent = 'ログイン中...';
-  auth.signInWithPopup(provider).catch(err => {
-    document.getElementById('loginStatus').style.display = 'none';
-    const errEl = document.getElementById('loginError');
-    errEl.style.display = 'block';
-    errEl.textContent = 'ログインに失敗しました: ' + (err.message || err.code || '不明なエラー');
-  });
-}
-function doLogout() {
-  if (!confirm('ログアウトしますか?')) return;
-  if (firestoreUnsub) firestoreUnsub();
-  auth.signOut();
-}
-
-auth.onAuthStateChanged(user => {
-  if (user && user.email === ALLOWED_EMAIL) {
-    currentUser = user;
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('appRoot').classList.add('ready');
-    subscribeToData();
-  } else if (user && user.email !== ALLOWED_EMAIL) {
-    // 許可されてないアカウント
-    auth.signOut();
-    document.getElementById('loginStatus').style.display = 'none';
-    const errEl = document.getElementById('loginError');
-    errEl.style.display = 'block';
-    errEl.textContent = 'このアカウントは登録されていません。しほ専用のGoogleアカウントでログインしてください。';
-  } else {
-    currentUser = null;
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('appRoot').classList.remove('ready');
-    document.getElementById('loginStatus').style.display = 'none';
-  }
-});
-
-// ============== Data ==============
 let data = {
-  customers: [], suppliers: [], employees: [],
+  partners: [], customers: [], suppliers: [], employees: [],
   loans: [], fixed: [], monthly: {}
 };
 
 function normalizeData() {
   data.customers ||= []; data.suppliers ||= []; data.employees ||= [];
   data.loans ||= []; data.fixed ||= []; data.monthly ||= {};
+  data.partners ||= [];
+
+  // 旧データ（得意先/仕入先）を取引先に統合（1回だけ）
+  if (data.customers.length > 0 || data.suppliers.length > 0) {
+    [...data.customers, ...data.suppliers].forEach(old => {
+      // 同名が既にpartnersにあればスキップ、なければ移行
+      if (!data.partners.some(pp => pp.id === old.id || pp.name === old.name)) {
+        data.partners.push(old);
+      }
+    });
+    data.customers = [];
+    data.suppliers = [];
+  }
+
+  data.partners.forEach(p => {
+    p.profile ||= {};
+    p.contacts ||= [];
+    p.memo ||= '';
+    p.drawing ||= '';
+  });
   data.employees.forEach(e => {
     e.profile ||= {};
     e.family ||= [];
@@ -1193,6 +1244,9 @@ function normalizeData() {
     l.payments ||= [];
     l.memo ||= '';
     l.drawing ||= '';
+    l.paymentDay ||= '';
+    l.payoffDate ||= '';
+    l.purpose ||= '';
   });
   data.fixed.forEach(f => {
     f.memo ||= '';
@@ -1200,30 +1254,14 @@ function normalizeData() {
   });
 }
 
-function getDocRef() {
-  return db.collection('users').doc(currentUser.uid).collection('data').doc('main');
-}
-
-function subscribeToData() {
-  setSyncStatus('saving', '接続中');
-  if (firestoreUnsub) firestoreUnsub();
-  firestoreUnsub = getDocRef().onSnapshot(doc => {
-    isRemoteUpdate = true;
-    if (doc.exists) {
-      const remote = doc.data();
-      data = remote.payload ? JSON.parse(remote.payload) : data;
-    } else {
-      // 初回：データが無ければ空データを作成
-      getDocRef().set({ payload: JSON.stringify(data), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-    }
-    normalizeData();
-    renderAll();
-    setSyncStatus('synced', '同期済み');
-    isRemoteUpdate = false;
-  }, err => {
-    setSyncStatus('', 'エラー');
-    console.error('Firestore同期エラー:', err);
-  });
+function loadData() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      data = JSON.parse(saved);
+    } catch(e) {}
+  }
+  normalizeData();
 }
 
 function setSyncStatus(state, label) {
@@ -1234,29 +1272,15 @@ function setSyncStatus(state, label) {
   lbl.textContent = label;
 }
 
-let saveTimer = null;
 function saveData() {
-  if (isRemoteUpdate) return; // リモート由来の変更はそのまま流さない（無限ループ防止）
-  if (!currentUser) return;
   setSyncStatus('saving', '保存中');
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    const payload = JSON.stringify(data);
-    // Firestore 1ドキュメント最大1MBの制限に注意（手書き画像が多いと超える可能性あり）
-    if (payload.length > 900000) {
-      setSyncStatus('', '容量超過');
-      alert('データ容量がクラウド保存の上限に近づいています。手書きメモを整理するか、バックアップ書き出しをおすすめします。');
-    }
-    getDocRef().set({
-      payload,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-      setSyncStatus('synced', '同期済み');
-    }).catch(err => {
-      setSyncStatus('', '保存失敗');
-      console.error('保存エラー:', err);
-    });
-  }, 500);
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    setSyncStatus('synced', '開発版(端末内)');
+  } catch(e) {
+    setSyncStatus('', '保存失敗');
+    alert('保存できませんでした。データ容量が上限に達したかも知れません。');
+  }
 }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
@@ -1282,10 +1306,10 @@ function changeMonth(delta) {
 }
 function getMonthData() {
   if (!data.monthly[currentYM]) {
-    data.monthly[currentYM] = { sales: {}, purchases: {}, salaries: {}, memoText: '', memoDrawing: '' };
+    data.monthly[currentYM] = { sales: {}, purchases: {}, salaries: {}, fixedOverrides: {}, memoText: '', memoDrawing: '' };
   }
   const m = data.monthly[currentYM];
-  m.sales ||= {}; m.purchases ||= {}; m.salaries ||= {};
+  m.sales ||= {}; m.purchases ||= {}; m.salaries ||= {}; m.fixedOverrides ||= {};
   m.memoText ||= ''; m.memoDrawing ||= '';
   return m;
 }
@@ -1306,7 +1330,7 @@ document.querySelectorAll('.tab').forEach(t => {
 
 // ============== Master ==============
 function addMaster(type) {
-  const inputId = type === 'customers' ? 'newCustomer' : type === 'suppliers' ? 'newSupplier' : 'newEmployee';
+  const inputId = type === 'partners' ? 'newPartner' : 'newEmployee';
   const input = document.getElementById(inputId);
   const name = input.value.trim();
   if (!name) return;
@@ -1316,6 +1340,8 @@ function addMaster(type) {
   }
   if (type === 'employees') {
     data.employees.push({ id: uid(), name, profile: {}, family: [], memo: '', drawing: '' });
+  } else if (type === 'partners') {
+    data.partners.push({ id: uid(), name, profile: {}, contacts: [], memo: '', drawing: '' });
   } else {
     data[type].push({ id: uid(), name });
   }
@@ -1327,8 +1353,13 @@ function removeMaster(type, id) {
   pendingDelete = () => {
     data[type] = data[type].filter(x => x.id !== id);
     Object.values(data.monthly).forEach(m => {
-      const key = type === 'customers' ? 'sales' : type === 'suppliers' ? 'purchases' : 'salaries';
-      if (m[key]) delete m[key][id];
+      if (type === 'partners') {
+        // 取引先削除時は売上・買掛の両方から消す
+        if (m.sales) delete m.sales[id];
+        if (m.purchases) delete m.purchases[id];
+      } else if (type === 'employees') {
+        if (m.salaries) delete m.salaries[id];
+      }
     });
     saveData();
     renderAll();
@@ -1338,17 +1369,18 @@ function removeMaster(type, id) {
 
 function addLoan() {
   const name = document.getElementById('newLoanName').value.trim();
-  const balance = parseFloat(document.getElementById('newLoanBalance').value) || 0;
+  const borrowed = parseFloat(document.getElementById('newLoanBalance').value) || 0; // 借りた金額
   const payment = parseFloat(document.getElementById('newLoanPayment').value) || 0;
   if (!name) return;
   data.loans.push({
     id: uid(), name,
     startDate: '', lender: '',
-    initialAmount: balance, initialBalance: balance,
-    currentBalance: balance,
+    initialAmount: borrowed, initialBalance: borrowed,
+    currentBalance: borrowed, // 登録時点では未返済なので残高＝借りた金額
     monthlyPayment: payment,
     payments: [],
-    memo: '', drawing: ''
+    memo: '', drawing: '',
+    paymentDay: '', payoffDate: '', purpose: ''
   });
   document.getElementById('newLoanName').value = '';
   document.getElementById('newLoanBalance').value = '';
@@ -1368,6 +1400,15 @@ function updateLoanBalance(id, val) {
   const loan = data.loans.find(l => l.id === id);
   if (loan) {
     loan.currentBalance = parseFloat(val) || 0;
+    saveData();
+    renderDashboard();
+    renderLoanCardList();
+  }
+}
+function updateLoanInitial(id, val) {
+  const loan = data.loans.find(l => l.id === id);
+  if (loan) {
+    loan.initialAmount = parseFloat(val) || 0;
     saveData();
     renderDashboard();
     renderLoanCardList();
@@ -1393,13 +1434,28 @@ function removeFixed(id) {
   showConfirm('固定費削除 ♡', 'この固定費を削除します。よろしいですか?');
 }
 function updateFixedAmount(id, val) {
-  const f = data.fixed.find(x => x.id === id);
-  if (f) {
-    f.amount = parseFloat(val) || 0;
-    saveData();
-    renderDashboard();
-    renderFixedView();
+  // その月だけの金額を上書き保存（デフォルト額は変えない）
+  const m = getMonthData();
+  m.fixedOverrides ||= {};
+  const amount = parseFloat(val) || 0;
+  const fixedItem = data.fixed.find(x => x.id === id);
+  const defaultAmount = fixedItem ? (fixedItem.amount || 0) : 0;
+  if (amount === defaultAmount) {
+    // デフォルトと同じなら上書きを消す（📌を外す）
+    delete m.fixedOverrides[id];
+  } else {
+    m.fixedOverrides[id] = amount;
   }
+  saveData();
+  renderDashboard();
+  renderFixedView();
+}
+function resetFixedToDefault(id) {
+  const m = getMonthData();
+  if (m.fixedOverrides) delete m.fixedOverrides[id];
+  saveData();
+  renderDashboard();
+  renderFixedView();
 }
 
 // ============== Monthly Entry ==============
@@ -1422,7 +1478,9 @@ function renderAll() {
   document.getElementById('ymDisplay').textContent = ymLabel(currentYM);
   renderDashboard();
   renderSales();
+  renderAnnual();
   renderPurchase();
+  renderAnnualPurchase();
   renderSalary();
   renderLoanCardList();
   renderFixedView();
@@ -1430,14 +1488,201 @@ function renderAll() {
   renderMaster();
 }
 
+// ============== Annual Sales (事業年度/暦年 切替) ==============
+let annualMode = 'fiscal'; // 'fiscal' (9月始まり) or 'calendar' (1月始まり)
+let annualYear = (() => {
+  const d = new Date();
+  return d.getFullYear();
+})();
+
+function setAnnualMode(mode) {
+  annualMode = mode;
+  renderAnnual();
+}
+function changeAnnualYear(delta) {
+  annualYear += delta;
+  renderAnnual();
+}
+function getAnnualMonths() {
+  // 12ヶ月分の "YYYY-MM" を返す
+  const months = [];
+  if (annualMode === 'fiscal') {
+    // annualYear年9月 〜 (annualYear+1)年8月
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(annualYear, 8 + i, 1); // 8 = September (0-indexed)
+      months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    }
+  } else {
+    // annualYear年1月 〜 12月
+    for (let i = 0; i < 12; i++) {
+      months.push(`${annualYear}-${String(i + 1).padStart(2, '0')}`);
+    }
+  }
+  return months;
+}
+let expandedAnnualMonth = null; // 展開中の月
+
+function toggleAnnualMonth(ym) {
+  expandedAnnualMonth = (expandedAnnualMonth === ym) ? null : ym;
+  renderAnnual();
+}
+
+function renderAnnual() {
+  document.getElementById('annualTabFiscal').classList.toggle('active', annualMode === 'fiscal');
+  document.getElementById('annualTabCalendar').classList.toggle('active', annualMode === 'calendar');
+
+  const months = getAnnualMonths();
+  if (annualMode === 'fiscal') {
+    document.getElementById('annualYearLabel').textContent = `${annualYear}年9月 〜 ${annualYear + 1}年8月`;
+  } else {
+    document.getElementById('annualYearLabel').textContent = `${annualYear}年（1〜12月）`;
+  }
+
+  let total = 0;
+  const rows = months.map(ym => {
+    const t = calcMonthTotals(ym);
+    total += t.sales;
+    const [y, m] = ym.split('-');
+    const isCurrent = ym === currentYM;
+    const isExpanded = expandedAnnualMonth === ym;
+    const monthData = data.monthly[ym] || {};
+    const salesByPartner = monthData.sales || {};
+
+    // 展開時：会社別内訳
+    let detailHtml = '';
+    if (isExpanded) {
+      const entries = data.partners
+        .map(p => ({ name: p.name, amount: salesByPartner[p.id] || 0 }))
+        .filter(e => e.amount > 0)
+        .sort((a, b) => b.amount - a.amount);
+      if (entries.length === 0) {
+        detailHtml = '<div style="padding: 10px 16px; font-size: 13px; color: var(--ink-light);">この月の売上入力なし</div>';
+      } else {
+        detailHtml = '<div style="padding: 4px 8px 10px;">' + entries.map(e => `
+          <div style="display:flex; justify-content:space-between; padding: 8px 12px; border-bottom: 1px dashed var(--line-strong); font-size: 14px;">
+            <span>${escapeHtml(e.name)}</span>
+            <span class="num" style="font-weight:600;">${yen(e.amount)}</span>
+          </div>
+        `).join('') + '</div>';
+      }
+    }
+
+    return `
+      <div style="${isCurrent ? 'background: var(--peach-soft); border-radius: 10px;' : ''} ${isExpanded ? 'background: var(--pink-soft); border-radius: 10px;' : ''}">
+        <div class="entry-item" style="cursor:pointer; padding-left: 8px; padding-right: 8px;" onclick="toggleAnnualMonth('${ym}')">
+          <div class="entry-name">${isExpanded ? '▾' : '▸'} ${y}年${parseInt(m)}月 ${isCurrent ? '📍' : ''}</div>
+          <div class="num" style="font-weight: 600; font-size: 15px;">${yen(t.sales)}</div>
+        </div>
+        ${detailHtml}
+      </div>
+    `;
+  }).join('');
+  document.getElementById('annualTable').innerHTML = rows;
+  document.getElementById('annualTotal').textContent = yen(total);
+}
+
+function getFixedAmountForMonth(fixedItem, ym) {
+  // 月次上書きがあればそれを、なければデフォルト額を返す
+  const m = data.monthly[ym];
+  if (m && m.fixedOverrides && m.fixedOverrides[fixedItem.id] !== undefined) {
+    return m.fixedOverrides[fixedItem.id];
+  }
+  return fixedItem.amount || 0;
+}
 function calcMonthTotals(ym) {
   const m = data.monthly[ym] || { sales: {}, purchases: {}, salaries: {} };
   const sales = Object.values(m.sales || {}).reduce((a, b) => a + b, 0);
   const purchases = Object.values(m.purchases || {}).reduce((a, b) => a + b, 0);
   const salaries = Object.values(m.salaries || {}).reduce((a, b) => a + b, 0);
-  const fixed = data.fixed.reduce((a, b) => a + b.amount, 0);
+  const fixed = data.fixed.reduce((a, b) => a + getFixedAmountForMonth(b, ym), 0);
   const loanPay = data.loans.reduce((a, b) => a + b.monthlyPayment, 0);
   return { sales, purchases, salaries, fixed, loanPay, expense: purchases + salaries + fixed + loanPay };
+}
+
+// ============== Annual Purchase (年間買掛) ==============
+let annualPurchaseMode = 'fiscal';
+let annualPurchaseYear = (new Date()).getFullYear();
+
+function setAnnualPurchaseMode(mode) {
+  annualPurchaseMode = mode;
+  renderAnnualPurchase();
+}
+function changeAnnualPurchaseYear(delta) {
+  annualPurchaseYear += delta;
+  renderAnnualPurchase();
+}
+function getAnnualPurchaseMonths() {
+  const months = [];
+  if (annualPurchaseMode === 'fiscal') {
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(annualPurchaseYear, 8 + i, 1);
+      months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    }
+  } else {
+    for (let i = 0; i < 12; i++) {
+      months.push(`${annualPurchaseYear}-${String(i + 1).padStart(2, '0')}`);
+    }
+  }
+  return months;
+}
+let expandedAnnualPurchaseMonth = null;
+
+function toggleAnnualPurchaseMonth(ym) {
+  expandedAnnualPurchaseMonth = (expandedAnnualPurchaseMonth === ym) ? null : ym;
+  renderAnnualPurchase();
+}
+
+function renderAnnualPurchase() {
+  document.getElementById('annualPurchaseTabFiscal').classList.toggle('active', annualPurchaseMode === 'fiscal');
+  document.getElementById('annualPurchaseTabCalendar').classList.toggle('active', annualPurchaseMode === 'calendar');
+
+  const months = getAnnualPurchaseMonths();
+  if (annualPurchaseMode === 'fiscal') {
+    document.getElementById('annualPurchaseYearLabel').textContent = `${annualPurchaseYear}年9月 〜 ${annualPurchaseYear + 1}年8月`;
+  } else {
+    document.getElementById('annualPurchaseYearLabel').textContent = `${annualPurchaseYear}年（1〜12月）`;
+  }
+
+  let total = 0;
+  const rows = months.map(ym => {
+    const t = calcMonthTotals(ym);
+    total += t.purchases;
+    const [y, m] = ym.split('-');
+    const isCurrent = ym === currentYM;
+    const isExpanded = expandedAnnualPurchaseMonth === ym;
+    const monthData = data.monthly[ym] || {};
+    const purchasesByPartner = monthData.purchases || {};
+
+    let detailHtml = '';
+    if (isExpanded) {
+      const entries = data.partners
+        .map(p => ({ name: p.name, amount: purchasesByPartner[p.id] || 0 }))
+        .filter(e => e.amount > 0)
+        .sort((a, b) => b.amount - a.amount);
+      if (entries.length === 0) {
+        detailHtml = '<div style="padding: 10px 16px; font-size: 13px; color: var(--ink-light);">この月の買掛入力なし</div>';
+      } else {
+        detailHtml = '<div style="padding: 4px 8px 10px;">' + entries.map(e => `
+          <div style="display:flex; justify-content:space-between; padding: 8px 12px; border-bottom: 1px dashed var(--line-strong); font-size: 14px;">
+            <span>${escapeHtml(e.name)}</span>
+            <span class="num" style="font-weight:600;">${yen(e.amount)}</span>
+          </div>
+        `).join('') + '</div>';
+      }
+    }
+
+    return `
+      <div style="${isCurrent ? 'background: var(--peach-soft); border-radius: 10px;' : ''} ${isExpanded ? 'background: var(--pink-soft); border-radius: 10px;' : ''}">
+        <div class="entry-item" style="cursor:pointer; padding-left: 8px; padding-right: 8px;" onclick="toggleAnnualPurchaseMonth('${ym}')">
+          <div class="entry-name">${isExpanded ? '▾' : '▸'} ${y}年${parseInt(m)}月 ${isCurrent ? '📍' : ''}</div>
+          <div class="num" style="font-weight: 600; font-size: 15px;">${yen(t.purchases)}</div>
+        </div>
+        ${detailHtml}
+      </div>
+    `;
+  }).join('');
+  document.getElementById('annualPurchaseTable').innerHTML = rows;
+  document.getElementById('annualPurchaseTotal').textContent = yen(total);
 }
 
 function renderDashboard() {
@@ -1553,12 +1798,12 @@ function renderSales() {
   document.getElementById('salesMonthLabel').textContent = ymLabelLong(currentYM) + 'の Sales';
   const list = document.getElementById('salesList');
   const m = getMonthData();
-  if (data.customers.length === 0) {
-    list.innerHTML = '<div class="empty">まだ得意先がありません<div class="empty-hint">↓ マスタ管理から追加してください</div></div>';
+  if (data.partners.length === 0) {
+    list.innerHTML = '<div class="empty">まだ取引先がありません<div class="empty-hint">↓ マスタ管理から追加してください</div></div>';
   } else {
-    list.innerHTML = data.customers.map(c => `
+    list.innerHTML = data.partners.map(c => `
       <div class="entry-item">
-        <div class="entry-name">${escapeHtml(c.name)}</div>
+        <div class="entry-name entry-name-link" onclick="openPartnerLedger('${c.id}')">${escapeHtml(c.name)} <span style="font-size:11px;color:var(--blue-bright);">▸</span></div>
         <input type="number" inputmode="numeric" class="entry-amount"
                value="${m.sales[c.id] || ''}" placeholder="0"
                onchange="updateEntry('sales', '${c.id}', this.value)">
@@ -1575,12 +1820,12 @@ function renderPurchase() {
   document.getElementById('purchaseMonthLabel').textContent = ymLabelLong(currentYM) + 'の Purchase';
   const list = document.getElementById('purchaseList');
   const m = getMonthData();
-  if (data.suppliers.length === 0) {
-    list.innerHTML = '<div class="empty">まだ仕入先がありません<div class="empty-hint">↓ マスタ管理から追加してください</div></div>';
+  if (data.partners.length === 0) {
+    list.innerHTML = '<div class="empty">まだ取引先がありません<div class="empty-hint">↓ マスタ管理から追加してください</div></div>';
   } else {
-    list.innerHTML = data.suppliers.map(s => `
+    list.innerHTML = data.partners.map(s => `
       <div class="entry-item">
-        <div class="entry-name">${escapeHtml(s.name)}</div>
+        <div class="entry-name entry-name-link" onclick="openPartnerLedger('${s.id}')">${escapeHtml(s.name)} <span style="font-size:11px;color:var(--blue-bright);">▸</span></div>
         <input type="number" inputmode="numeric" class="entry-amount"
                value="${m.purchases[s.id] || ''}" placeholder="0"
                onchange="updateEntry('purchases', '${s.id}', this.value)">
@@ -1616,6 +1861,31 @@ function renderSalaryTotal() {
   document.getElementById('salaryTotal').textContent = yen(Object.values(getMonthData().salaries || {}).reduce((a, b) => a + b, 0));
 }
 
+function getRecentPayment(loan) {
+  // 直近の支払履歴があればその額、なければ登録した毎月返済額
+  if (loan.payments && loan.payments.length > 0) {
+    const sorted = [...loan.payments].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    if (sorted[0].amount > 0) return sorted[0].amount;
+  }
+  return loan.monthlyPayment || 0;
+}
+function calcPayoff(loan) {
+  // 完済予定の計算：直近の返済額をベースに概算
+  const recentPay = getRecentPayment(loan);
+  const monthsLeft = recentPay > 0 ? Math.ceil(loan.currentBalance / recentPay) : 0;
+  const years = Math.floor(monthsLeft / 12);
+  const months = monthsLeft % 12;
+  let payoffLabel = '';
+  if (loan.payoffDate) {
+    payoffLabel = loan.payoffDate;
+  } else if (monthsLeft > 0) {
+    const d = new Date();
+    d.setMonth(d.getMonth() + monthsLeft);
+    payoffLabel = `${d.getFullYear()}年${d.getMonth() + 1}月ごろ`;
+  }
+  return { monthsLeft, years, months, payoffLabel, recentPay };
+}
+
 function renderLoanCardList() {
   const list = document.getElementById('loanCardList');
   if (data.loans.length === 0) {
@@ -1623,41 +1893,60 @@ function renderLoanCardList() {
     return;
   }
   list.innerHTML = data.loans.map(l => {
-    const monthsLeft = l.monthlyPayment > 0 ? Math.ceil(l.currentBalance / l.monthlyPayment) : 0;
-    const yearsLeft = (monthsLeft / 12).toFixed(1);
+    const po = calcPayoff(l);
     const initial = l.initialAmount || l.initialBalance || 0;
     const progressPct = initial > 0 ? Math.max(0, Math.min(100, (1 - l.currentBalance / initial) * 100)) : 0;
-    const lastPayment = l.payments && l.payments.length > 0 ? l.payments[l.payments.length - 1] : null;
+    const remainLabel = po.monthsLeft > 0
+      ? `${po.years > 0 ? po.years + '年' : ''}${po.months}ヶ月`
+      : '完済 🎉';
     return `
       <div class="loan-card">
         <div class="loan-header">
           <div class="loan-name">${escapeHtml(l.name)}</div>
-          <div class="loan-badge">あと ${monthsLeft}ヶ月 (${yearsLeft}年)</div>
+          ${l.purpose ? `<div class="loan-badge">🎯 ${escapeHtml(l.purpose)}</div>` : ''}
         </div>
+
         <div class="loan-body">
           <div>
-            <label>現在残高 / Balance</label>
+            <label>借りた金額 / 当初借入額</label>
             <input type="number" inputmode="numeric"
-                   value="${l.currentBalance}"
-                   onchange="updateLoanBalance('${l.id}', this.value)"
-                   style="width: 170px; padding: 9px 12px;">
+                   value="${initial}"
+                   onchange="updateLoanInitial('${l.id}', this.value)"
+                   style="width: 180px; padding: 10px 12px; font-size: 17px; font-weight: 700;">
           </div>
-          <div style="font-size: 13px; color: var(--ink);">
-            毎月返済 <span class="num" style="font-weight: 600;">${yen(l.monthlyPayment)}</span>
+          <div style="font-size: 14px; color: var(--ink);">
+            毎月返済 <span class="num" style="font-weight: 700;">${yen(po.recentPay)}</span>
+            ${l.payments && l.payments.length > 0 ? '<span style="font-size:10px; color:var(--ink-light); display:block;">※直近の実績額</span>' : ''}
           </div>
         </div>
+
+        <div class="loan-remain">
+          <div class="loan-remain-label">返済まであと</div>
+          <div class="loan-remain-value">${remainLabel}</div>
+          ${po.payoffLabel ? `<div class="loan-remain-date">完済予定: ${escapeHtml(po.payoffLabel)}</div>` : ''}
+        </div>
+
+        <div class="loan-current-balance">
+          <span style="font-size: 12px; color: var(--ink-soft);">現在の残高</span>
+          <input type="number" inputmode="numeric"
+                 value="${l.currentBalance}"
+                 onchange="updateLoanBalance('${l.id}', this.value)"
+                 style="width: 150px; padding: 7px 10px; font-size: 14px;">
+          <span style="font-size: 11px; color: var(--ink-light);">支払い記録すると自動で減ります</span>
+        </div>
+
         <div class="loan-meta">
           ${l.lender ? `<div class="loan-meta-item">借入先: ${escapeHtml(l.lender)}</div>` : ''}
           ${l.startDate ? `<div class="loan-meta-item">借入日: ${escapeHtml(l.startDate)}</div>` : ''}
-          ${initial ? `<div class="loan-meta-item">当初: ${yen(initial)}</div>` : ''}
-          ${lastPayment ? `<div class="loan-meta-item">最新金利: ${lastPayment.interestRate || '-'}%</div>` : ''}
+          ${l.paymentDay ? `<div class="loan-meta-item">引落: 毎月${escapeHtml(l.paymentDay)}日</div>` : ''}
         </div>
+
         <div class="loan-progress">
           <div class="loan-progress-fill" style="width: ${progressPct}%;"></div>
         </div>
         <div class="loan-pct">返済進捗 ${progressPct.toFixed(1)}% ✨</div>
         <div class="loan-actions">
-          <button class="btn-detail" onclick="openLoanDetail('${l.id}')">📝 詳細・支払履歴</button>
+          <button class="btn-detail" onclick="openLoanDetail('${l.id}')">📝 詳細・毎月の支払い記録</button>
         </div>
       </div>
     `;
@@ -1665,41 +1954,47 @@ function renderLoanCardList() {
 }
 
 function renderFixedView() {
+  document.getElementById('fixedMonthLabel').textContent = ymLabelLong(currentYM) + 'の固定費';
   const list = document.getElementById('fixedList');
+  const m = getMonthData();
+  const overrides = m.fixedOverrides || {};
   if (data.fixed.length === 0) {
     list.innerHTML = '<div class="empty">まだ固定費がありません<div class="empty-hint">マスタ管理から追加してください</div></div>';
   } else {
-    list.innerHTML = data.fixed.map(f => `
+    list.innerHTML = data.fixed.map(f => {
+      const monthAmount = getFixedAmountForMonth(f, currentYM);
+      const isOverridden = overrides[f.id] !== undefined;
+      return `
       <div class="entry-item">
         <div class="entry-name">
           ${escapeHtml(f.name)}
-          ${f.memo || f.drawing ? '<span style="font-size: 11px; color: var(--blue); margin-left: 6px;">📝</span>' : ''}
+          ${isOverridden ? '<span style="font-size: 11px; color: var(--red); margin-left: 6px;" title="この月だけ変更されています">📌</span>' : ''}
+          ${f.memo || f.drawing ? '<span style="font-size: 11px; color: var(--blue); margin-left: 4px;">📝</span>' : ''}
+          ${isOverridden ? `<button onclick="resetFixedToDefault('${f.id}')" style="font-size: 10px; margin-left: 6px; background: var(--peach-soft); border: 1px solid var(--line-strong); border-radius: 6px; padding: 2px 6px; cursor: pointer; color: var(--ink-soft);">通常額(${yen(f.amount)})に戻す</button>` : ''}
         </div>
         <button class="btn-detail btn-sm" onclick="openFixedDetail('${f.id}')">詳細</button>
         <input type="number" inputmode="numeric" class="entry-amount"
-               value="${f.amount}"
+               value="${monthAmount}"
+               style="${isOverridden ? 'border-color: var(--red); background: white;' : ''}"
                onchange="updateFixedAmount('${f.id}', this.value)">
       </div>
-    `).join('');
+    `;
+    }).join('');
   }
-  document.getElementById('fixedTotal').textContent = yen(data.fixed.reduce((a, b) => a + b.amount, 0));
+  const total = data.fixed.reduce((a, b) => a + getFixedAmountForMonth(b, currentYM), 0);
+  document.getElementById('fixedTotal').textContent = yen(total);
 }
 
 function renderMaster() {
   const emptyMsg = '<div style="color: var(--ink-light); font-size: 13px; padding: 8px 0;">まだありません</div>';
 
-  document.getElementById('customerList').innerHTML = data.customers.length === 0 ? emptyMsg
-    : data.customers.map(c => `
+  document.getElementById('partnerList').innerHTML = data.partners.length === 0 ? emptyMsg
+    : data.partners.map(c => `
         <div class="master-item">
-          <div class="name">${escapeHtml(c.name)}</div>
-          <button class="btn btn-danger" onclick="removeMaster('customers', '${c.id}')">削除</button>
-        </div>`).join('');
-
-  document.getElementById('supplierList').innerHTML = data.suppliers.length === 0 ? emptyMsg
-    : data.suppliers.map(s => `
-        <div class="master-item">
-          <div class="name">${escapeHtml(s.name)}</div>
-          <button class="btn btn-danger" onclick="removeMaster('suppliers', '${s.id}')">削除</button>
+          <div class="name">${escapeHtml(c.name)} ${(c.memo || c.drawing || (c.contacts && c.contacts.length)) ? '<span style="font-size:11px;color:var(--blue);">📝</span>' : ''}</div>
+          <button class="btn-detail btn-sm" onclick="openPartnerLedger('${c.id}')">📊 取引</button>
+          <button class="btn-detail btn-sm" onclick="openPartnerDetail('partners', '${c.id}')">📝 編集</button>
+          <button class="btn btn-danger" onclick="removeMaster('partners', '${c.id}')">削除</button>
         </div>`).join('');
 
   document.getElementById('employeeList').innerHTML = data.employees.length === 0 ? emptyMsg
@@ -1714,7 +2009,7 @@ function renderMaster() {
     : data.loans.map(l => `
         <div class="master-item">
           <div class="name">${escapeHtml(l.name)}</div>
-          <div class="meta">残${yen(l.currentBalance)}/月${yen(l.monthlyPayment)}</div>
+          <div class="meta">借${yen(l.initialAmount || l.currentBalance)}/残${yen(l.currentBalance)}/月${yen(l.monthlyPayment)}</div>
           <button class="btn btn-danger" onclick="removeLoan('${l.id}')">削除</button>
         </div>`).join('');
 
@@ -2018,6 +2313,220 @@ function saveEmployeeDetail(id) {
   alert('保存しました ♡');
 }
 
+// ---- 取引先の取引履歴（会社別の売上・買掛をまとめて見る） ----
+function openPartnerLedger(id) {
+  const partner = data.partners.find(x => x.id === id);
+  if (!partner) return;
+
+  // 全期間の月次データから、この会社の売上・買掛を集める
+  const records = [];
+  let totalSales = 0, totalPurchase = 0;
+  Object.keys(data.monthly).sort().reverse().forEach(ym => {
+    const m = data.monthly[ym];
+    const sale = (m.sales && m.sales[id]) || 0;
+    const purchase = (m.purchases && m.purchases[id]) || 0;
+    if (sale > 0 || purchase > 0) {
+      records.push({ ym, sale, purchase });
+      totalSales += sale;
+      totalPurchase += purchase;
+    }
+  });
+
+  const p = partner.profile || {};
+  // 基本情報サマリー
+  const infoItems = [];
+  if (p.phone) infoItems.push(`📞 ${escapeHtml(p.phone)}`);
+  if (p.address) infoItems.push(`📍 ${escapeHtml(p.address)}`);
+  if (p.email) infoItems.push(`✉️ ${escapeHtml(p.email)}`);
+  if (partner.contacts && partner.contacts.length) {
+    infoItems.push(`👤 担当: ${partner.contacts.map(c => escapeHtml(c.name)).filter(Boolean).join('、')}`);
+  }
+
+  let historyHtml;
+  if (records.length === 0) {
+    historyHtml = '<div class="empty" style="background:white;">まだ取引の記録がありません<div class="empty-hint">売上・買掛タブで金額を入力すると、ここに集計されます</div></div>';
+  } else {
+    historyHtml = `
+      <div class="pay-history">
+        <div class="pay-history-header" style="grid-template-columns: 1.2fr 1fr 1fr;">
+          <div>年月</div>
+          <div style="text-align:right;">売上（もらった）</div>
+          <div style="text-align:right;">買掛（あげた）</div>
+        </div>
+        ${records.map(r => {
+          const [y, mo] = r.ym.split('-');
+          return `
+          <div class="pay-history-row" style="grid-template-columns: 1.2fr 1fr 1fr;">
+            <div class="num">${y}/${mo}</div>
+            <div class="num" style="text-align:right; color: var(--blue);">${r.sale > 0 ? yen(r.sale) : '−'}</div>
+            <div class="num" style="text-align:right; color: var(--rose, #c97b7b);">${r.purchase > 0 ? yen(r.purchase) : '−'}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  openDetailModal(`
+    <h3>📊 ${escapeHtml(partner.name)} の取引</h3>
+
+    ${infoItems.length ? `<div style="background: var(--cream); border: 1.5px dashed var(--line-strong); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; font-size: 13px; line-height: 1.9;">${infoItems.join('<br>')}</div>` : ''}
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
+      <div class="stat income" style="box-shadow: 3px 3px 0 var(--ink);">
+        <div class="stat-label">売上 累計（もらった）</div>
+        <div class="stat-value num" style="font-size: 22px;">${yen(totalSales)}</div>
+      </div>
+      <div class="stat expense" style="box-shadow: 3px 3px 0 var(--ink);">
+        <div class="stat-label">買掛 累計（あげた）</div>
+        <div class="stat-value num" style="font-size: 22px;">${yen(totalPurchase)}</div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">取引履歴（月別）</div>
+      ${historyHtml}
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-soft" onclick="closeDetailModal()">閉じる</button>
+      <button class="btn" onclick="closeDetailModal(); openPartnerDetail('partners', '${id}');">📝 会社情報を編集</button>
+    </div>
+  `);
+}
+
+// ---- 取引先 詳細（住所・連絡先・担当者） ----
+function openPartnerDetail(type, id) {
+  const partner = data[type].find(x => x.id === id);
+  if (!partner) return;
+  const p = partner.profile;
+  const typeLabel = '取引先';
+
+  openDetailModal(`
+    <h3>🏢 ${escapeHtml(partner.name)} の詳細（${typeLabel}）</h3>
+
+    <div class="modal-section">
+      <div class="modal-section-title">基本情報</div>
+      <div class="form-grid">
+        <div style="grid-column: 1 / -1;"><label>会社名</label><input type="text" id="pt_name" value="${escapeHtml(partner.name)}"></div>
+        <div><label>郵便番号</label><input type="text" id="pt_postal" value="${escapeHtml(p.postal || '')}" placeholder="〒"></div>
+        <div><label>電話番号</label><input type="text" id="pt_phone" value="${escapeHtml(p.phone || '')}"></div>
+        <div style="grid-column: 1 / -1;"><label>住所</label><input type="text" id="pt_address" value="${escapeHtml(p.address || '')}"></div>
+        <div><label>FAX番号</label><input type="text" id="pt_fax" value="${escapeHtml(p.fax || '')}"></div>
+        <div><label>メールアドレス（請求書等）</label><input type="text" id="pt_email" value="${escapeHtml(p.email || '')}"></div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">インボイス・取引条件</div>
+      <div class="form-grid">
+        <div><label>適格請求書発行事業者番号</label><input type="text" id="pt_invoiceNumber" value="${escapeHtml(p.invoiceNumber || '')}" placeholder="T-1234567890123"></div>
+        <div><label>支払方法</label><input type="text" id="pt_paymentMethod" value="${escapeHtml(p.paymentMethod || '')}" placeholder="振込・現金など"></div>
+        <div><label>締め日</label><input type="text" id="pt_closingDay" value="${escapeHtml(p.closingDay || '')}" placeholder="例：末日"></div>
+        <div><label>支払日</label><input type="text" id="pt_paymentDay" value="${escapeHtml(p.paymentDay || '')}" placeholder="例：翌月末"></div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">振込先口座（相手の受取口座）</div>
+      <div class="form-grid">
+        <div><label>銀行名</label><input type="text" id="pt_bankName" value="${escapeHtml(p.bankName || '')}"></div>
+        <div><label>支店名</label><input type="text" id="pt_bankBranch" value="${escapeHtml(p.bankBranch || '')}"></div>
+        <div><label>口座種別</label><input type="text" id="pt_bankType" value="${escapeHtml(p.bankType || '')}" placeholder="普通・当座"></div>
+        <div><label>口座番号</label><input type="text" id="pt_bankNumber" value="${escapeHtml(p.bankNumber || '')}"></div>
+        <div style="grid-column: 1 / -1;"><label>口座名義（カナ）</label><input type="text" id="pt_bankHolder" value="${escapeHtml(p.bankHolder || '')}"></div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">担当者一覧 <button class="btn btn-pink btn-sm" onclick="addContactRow('${type}', '${id}')" style="margin-left: 8px;">+ 担当者追加</button></div>
+      <p style="font-size: 11px; color: var(--ink-light); margin: 0 0 8px;">担当者が複数いる場合はここに追加できます</p>
+      <div id="contactList_${type}_${id}" class="family-list"></div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">メモ</div>
+      <textarea id="pt_memo" placeholder="取引の経緯、特記事項など...">${escapeHtml(partner.memo || '')}</textarea>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">手書きメモ</div>
+      <div class="draw-wrap">
+        <canvas class="draw-canvas" id="pt_canvas"></canvas>
+        <div class="draw-toolbar" id="pt_canvas_toolbar"></div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-soft" onclick="closeDetailModal()">閉じる</button>
+      <button class="btn" onclick="savePartnerDetail('${type}', '${id}')">💾 保存</button>
+    </div>
+  `);
+
+  renderContactList(type, id);
+
+  setTimeout(() => {
+    const canvas = document.getElementById('pt_canvas');
+    const drawCanvas = new DrawCanvas(canvas, partner.drawing, (dataUrl) => {
+      partner.drawing = dataUrl;
+    });
+    setupToolbar('pt_canvas_toolbar', drawCanvas);
+  }, 50);
+}
+
+function renderContactList(type, id) {
+  const partner = data[type].find(x => x.id === id);
+  if (!partner) return;
+  const list = document.getElementById(`contactList_${type}_${id}`);
+  if (!list) return;
+  if (!partner.contacts || partner.contacts.length === 0) {
+    list.innerHTML = '<div style="font-size: 12px; color: var(--ink-light); padding: 8px 0;">担当者情報なし</div>';
+    return;
+  }
+  list.innerHTML = partner.contacts.map((c, i) => `
+    <div class="family-row" style="grid-template-columns: 1fr 1.5fr auto;">
+      <input type="text" placeholder="担当者名" value="${escapeHtml(c.name || '')}" onchange="updateContact('${type}', '${id}', ${i}, 'name', this.value)">
+      <input type="text" placeholder="メールアドレス" value="${escapeHtml(c.email || '')}" onchange="updateContact('${type}', '${id}', ${i}, 'email', this.value)">
+      <button class="btn btn-danger" onclick="removeContact('${type}', '${id}', ${i})">×</button>
+    </div>
+  `).join('');
+}
+function addContactRow(type, id) {
+  const partner = data[type].find(x => x.id === id);
+  if (!partner) return;
+  partner.contacts ||= [];
+  partner.contacts.push({ name: '', email: '' });
+  renderContactList(type, id);
+}
+function updateContact(type, id, idx, field, val) {
+  const partner = data[type].find(x => x.id === id);
+  if (!partner || !partner.contacts[idx]) return;
+  partner.contacts[idx][field] = val;
+}
+function removeContact(type, id, idx) {
+  const partner = data[type].find(x => x.id === id);
+  if (!partner) return;
+  partner.contacts.splice(idx, 1);
+  renderContactList(type, id);
+}
+
+function savePartnerDetail(type, id) {
+  const partner = data[type].find(x => x.id === id);
+  if (!partner) return;
+  partner.name = document.getElementById('pt_name').value || partner.name;
+  const fields = ['postal', 'phone', 'address', 'fax', 'email',
+                   'invoiceNumber', 'paymentMethod', 'closingDay', 'paymentDay',
+                   'bankName', 'bankBranch', 'bankType', 'bankNumber', 'bankHolder'];
+  fields.forEach(f => {
+    const el = document.getElementById('pt_' + f);
+    if (el) partner.profile[f] = el.value;
+  });
+  partner.memo = document.getElementById('pt_memo').value;
+  saveData();
+  closeDetailModal();
+  renderAll();
+  alert('保存しました ♡');
+}
+
 // ---- 融資詳細 ----
 function openLoanDetail(id) {
   const loan = data.loans.find(l => l.id === id);
@@ -2030,11 +2539,15 @@ function openLoanDetail(id) {
       <div class="modal-section-title">借入情報</div>
       <div class="form-grid">
         <div><label>借入元（金融機関名）</label><input type="text" id="loan_lender" value="${escapeHtml(loan.lender || '')}" placeholder="例：日本政策金融公庫"></div>
-        <div><label>借入開始日</label><input type="date" id="loan_startDate" value="${loan.startDate || ''}"></div>
-        <div><label>当初借入額</label><input type="number" id="loan_initialAmount" value="${loan.initialAmount || ''}" inputmode="numeric"></div>
+        <div><label>何のために借りた?（目的）</label><input type="text" id="loan_purpose" value="${escapeHtml(loan.purpose || '')}" placeholder="例：設備投資・運転資金"></div>
+        <div><label>借入開始日（借りた日）</label><input type="date" id="loan_startDate" value="${loan.startDate || ''}"></div>
+        <div><label>当初借入額（借りた金額）</label><input type="number" id="loan_initialAmount" value="${loan.initialAmount || ''}" inputmode="numeric"></div>
         <div><label>毎月返済額</label><input type="number" id="loan_monthlyPayment" value="${loan.monthlyPayment || ''}" inputmode="numeric"></div>
-        <div style="grid-column: 1 / -1;"><label>現在残高</label><input type="number" id="loan_currentBalance" value="${loan.currentBalance || ''}" inputmode="numeric"></div>
+        <div><label>毎月の引き落とし日</label><input type="number" id="loan_paymentDay" value="${loan.paymentDay || ''}" inputmode="numeric" placeholder="例：27" min="1" max="31"></div>
+        <div><label>現在残高</label><input type="number" id="loan_currentBalance" value="${loan.currentBalance || ''}" inputmode="numeric"></div>
+        <div><label>完済予定日（手入力・任意）</label><input type="date" id="loan_payoffDate" value="${loan.payoffDate || ''}"></div>
       </div>
+      <p style="font-size: 11px; color: var(--ink-light); margin: 8px 0 0;">💡 完済予定日を空欄にすると、残高÷毎月返済額から自動で計算されます</p>
     </div>
 
     <div class="modal-section">
@@ -2060,7 +2573,7 @@ function openLoanDetail(id) {
 
     <div class="modal-section">
       <div class="modal-section-title">メモ</div>
-      <textarea id="loan_memo" placeholder="契約条件、担当者、特記事項など...">${escapeHtml(loan.memo || '')}</textarea>
+      <textarea id="loan_memo" placeholder="契約条件、担当者、返済の経緯、繰上返済の記録など...">${escapeHtml(loan.memo || '')}</textarea>
     </div>
 
     <div class="modal-section">
@@ -2110,6 +2623,12 @@ function renderPayHistory(id) {
   `).join('');
 }
 
+function recalcBalanceFromPayments(loan) {
+  // 当初借入額から全支払いを引いて残高を再計算
+  const initial = loan.initialAmount || loan.initialBalance || 0;
+  const totalPaid = (loan.payments || []).reduce((a, p) => a + (p.amount || 0), 0);
+  return Math.max(0, initial - totalPaid);
+}
 function addPayment(id) {
   const loan = data.loans.find(l => l.id === id);
   if (!loan) return;
@@ -2129,24 +2648,36 @@ function addPayment(id) {
   document.getElementById('payRate').value = '';
   saveData();
   renderPayHistory(id);
+  renderLoanCardList();
 }
 function removePayment(id, idx) {
   if (!confirm('この支払記録を削除しますか?')) return;
   const loan = data.loans.find(l => l.id === id);
   if (!loan) return;
+  const removed = loan.payments[idx];
   loan.payments.splice(idx, 1);
+  // 削除した分を残高に戻す
+  if (removed) {
+    loan.currentBalance = (loan.currentBalance || 0) + (removed.amount || 0);
+    const balEl = document.getElementById('loan_currentBalance');
+    if (balEl) balEl.value = loan.currentBalance;
+  }
   saveData();
   renderPayHistory(id);
+  renderLoanCardList();
 }
 
 function saveLoanDetail(id) {
   const loan = data.loans.find(l => l.id === id);
   if (!loan) return;
   loan.lender = document.getElementById('loan_lender').value;
+  loan.purpose = document.getElementById('loan_purpose').value;
   loan.startDate = document.getElementById('loan_startDate').value;
   loan.initialAmount = parseFloat(document.getElementById('loan_initialAmount').value) || 0;
   loan.monthlyPayment = parseFloat(document.getElementById('loan_monthlyPayment').value) || 0;
+  loan.paymentDay = document.getElementById('loan_paymentDay').value;
   loan.currentBalance = parseFloat(document.getElementById('loan_currentBalance').value) || 0;
+  loan.payoffDate = document.getElementById('loan_payoffDate').value;
   loan.memo = document.getElementById('loan_memo').value;
   saveData();
   closeDetailModal();
@@ -2261,15 +2792,18 @@ function importData(event) {
 }
 function confirmReset() {
   pendingDelete = () => {
-    data = { customers: [], suppliers: [], employees: [], loans: [], fixed: [], monthly: {} };
+    data = { partners: [], customers: [], suppliers: [], employees: [], loans: [], fixed: [], monthly: {} };
     saveData();
     renderAll();
   };
   showConfirm('全削除 ⚠', '全データを削除します。元に戻せないので慎重に!');
 }
 
-// データ読み込みは auth.onAuthStateChanged → subscribeToData() 経由で行われる
-window.addEventListener('resize', () => { if (currentUser) renderChart(); });
+// 開発版：即座にローカルデータを読み込んで表示
+loadData();
+renderAll();
+setSyncStatus('synced', '開発版(端末内)');
+window.addEventListener('resize', () => renderChart());
 </script>
 </body>
 </html>
