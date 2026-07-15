@@ -8,11 +8,26 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Zen+Maru+Gothic:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<!-- 開発版：Firebase無効（ローカル保存のみ） -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-  #loginScreen { display: none !important; }
-  #appRoot { display: block !important; }
+  /* ===== ログイン画面 ===== */
+  #loginScreen {
+    position: fixed; inset: 0;
+    background: var(--cream);
+    background-image:
+      radial-gradient(circle at 10% 20%, var(--peach-soft) 0%, transparent 35%),
+      radial-gradient(circle at 90% 80%, var(--pink-soft) 0%, transparent 35%);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999;
+    flex-direction: column;
+    padding: 20px;
+    text-align: center;
+  }
+  #appRoot { display: none; }
+  #appRoot.ready { display: block; }
   #loginScreen .login-logo {
     font-family: 'Fraunces', serif;
     font-style: italic;
@@ -957,7 +972,6 @@
     <span class="heart">♥</span>
     <span style="font-style: italic;">Money Diary</span>
     <span class="sub">KEIEI</span>
-    <span class="sub" style="background: var(--orange); margin-left: 4px;">DEV</span>
   </div>
   <div class="header-right">
     <div class="sync-badge"><span class="sync-dot" id="syncDot"></span><span id="syncLabel">-</span></div>
@@ -966,7 +980,7 @@
       <div class="ym-display" id="ymDisplay">2026.5</div>
       <button onclick="changeMonth(1)">›</button>
     </div>
-    <button id="logoutBtn" onclick="doLogout()" title="ログアウト" style="display:none;">⏻</button>
+    <button id="logoutBtn" onclick="doLogout()" title="ログアウト">⏻</button>
   </div>
 </header>
 
@@ -1127,8 +1141,9 @@
     <div class="master-section s1">
       <h3>取引先 / Partners</h3>
       <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px;">売上（仕事をもらう）も買掛（仕事をあげる）も、同じ取引先に記録できます。追加後、一覧から詳細を編集できます</p>
-      <div class="input-row">
-        <input type="text" id="newPartner" placeholder="例：東京エレクトロン">
+      <div class="input-row" style="flex-wrap: wrap;">
+        <input type="text" id="newPartner" placeholder="会社名（例：東京エレクトロン）" style="flex: 1 1 100%;">
+        <input type="text" id="newPartnerKana" placeholder="フリガナ（例：トウキョウエレクトロン）※任意" style="flex: 1;">
         <button class="btn" onclick="addMaster('partners')">追加 +</button>
       </div>
       <button class="btn btn-soft" style="width:100%; margin-top:6px;" onclick="openListModal('partners')" id="partnerCountBtn">📋 一覧・編集を見る</button>
@@ -1217,10 +1232,69 @@
 </div><!-- /#appRoot -->
 
 <script>
-// ============== Data (開発版：ローカル保存のみ、Firebase無効) ==============
-const STORAGE_KEY = 'keiei_note_data_dev_v1';
-let currentUser = { uid: 'dev-local' }; // 開発版はログイン不要
+// ============== Firebase ==============
+const firebaseConfig = {
+  apiKey: "AIzaSyB2Jcp4JQbZFOG2OvcT4VaFLf33x3ksCMU",
+  authDomain: "money-diary-shiho.firebaseapp.com",
+  projectId: "money-diary-shiho",
+  storageBucket: "money-diary-shiho.firebasestorage.app",
+  messagingSenderId: "451841166772",
+  appId: "1:451841166772:web:ae42f1caf4ec46db3c36e1"
+};
+const ALLOWED_EMAIL = "k.family.sats@gmail.com";
 
+let auth = null, db = null;
+let currentUser = null;
+let firestoreUnsub = null;
+let isRemoteUpdate = false;
+
+if (typeof firebase !== 'undefined') {
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+  db = firebase.firestore();
+  db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+
+  auth.onAuthStateChanged(user => {
+    if (user && user.email === ALLOWED_EMAIL) {
+      currentUser = user;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appRoot').classList.add('ready');
+      subscribeToData();
+    } else if (user && user.email !== ALLOWED_EMAIL) {
+      auth.signOut();
+      document.getElementById('loginStatus').style.display = 'none';
+      const errEl = document.getElementById('loginError');
+      errEl.style.display = 'block';
+      errEl.textContent = 'このアカウントは登録されていません。しほ専用のGoogleアカウントでログインしてください。';
+    } else {
+      currentUser = null;
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('appRoot').classList.remove('ready');
+      document.getElementById('loginStatus').style.display = 'none';
+    }
+  });
+}
+
+function doLogin() {
+  if (!auth) { alert('Firebaseが読み込めていません。ネット接続を確認して再読み込みしてください。'); return; }
+  const provider = new firebase.auth.GoogleAuthProvider();
+  document.getElementById('loginError').style.display = 'none';
+  document.getElementById('loginStatus').style.display = 'block';
+  document.getElementById('loginStatus').textContent = 'ログイン中...';
+  auth.signInWithPopup(provider).catch(err => {
+    document.getElementById('loginStatus').style.display = 'none';
+    const errEl = document.getElementById('loginError');
+    errEl.style.display = 'block';
+    errEl.textContent = 'ログインに失敗しました: ' + (err.message || err.code || '不明なエラー');
+  });
+}
+function doLogout() {
+  if (!confirm('ログアウトしますか?')) return;
+  if (firestoreUnsub) firestoreUnsub();
+  if (auth) auth.signOut();
+}
+
+// ============== Data (Firestore同期) ==============
 let data = {
   partners: [], customers: [], suppliers: [], employees: [],
   loans: [], fixed: [], monthly: {}
@@ -1244,6 +1318,7 @@ function normalizeData() {
   }
 
   data.partners.forEach(p => {
+    p.kana ||= '';
     p.profile ||= {};
     p.contacts ||= [];
     p.memo ||= '';
@@ -1272,14 +1347,30 @@ function normalizeData() {
   });
 }
 
-function loadData() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    try {
-      data = JSON.parse(saved);
-    } catch(e) {}
-  }
-  normalizeData();
+function getDocRef() {
+  return db.collection('users').doc(currentUser.uid).collection('data').doc('main');
+}
+
+function subscribeToData() {
+  setSyncStatus('saving', '接続中');
+  if (firestoreUnsub) firestoreUnsub();
+  firestoreUnsub = getDocRef().onSnapshot(doc => {
+    isRemoteUpdate = true;
+    if (doc.exists) {
+      const remote = doc.data();
+      data = remote.payload ? JSON.parse(remote.payload) : data;
+    } else {
+      getDocRef().set({ payload: JSON.stringify(data), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+    normalizeData();
+    renderAll();
+    updateExportLabel();
+    setSyncStatus('synced', '同期済み');
+    isRemoteUpdate = false;
+  }, err => {
+    setSyncStatus('', 'エラー');
+    console.error('Firestore同期エラー:', err);
+  });
 }
 
 function setSyncStatus(state, label) {
@@ -1290,15 +1381,28 @@ function setSyncStatus(state, label) {
   lbl.textContent = label;
 }
 
+let saveTimer = null;
 function saveData() {
+  if (isRemoteUpdate) return;
+  if (!currentUser) return;
   setSyncStatus('saving', '保存中');
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    setSyncStatus('synced', '開発版(端末内)');
-  } catch(e) {
-    setSyncStatus('', '保存失敗');
-    alert('保存できませんでした。データ容量が上限に達したかも知れません。');
-  }
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    const payload = JSON.stringify(data);
+    if (payload.length > 900000) {
+      setSyncStatus('', '容量超過');
+      alert('データ容量がクラウド保存の上限に近づいています。手書きメモを整理するか、バックアップ書き出しをおすすめします。');
+    }
+    getDocRef().set({
+      payload,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      setSyncStatus('synced', '同期済み');
+    }).catch(err => {
+      setSyncStatus('', '保存失敗');
+      console.error('保存エラー:', err);
+    });
+  }, 500);
 }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
@@ -1359,7 +1463,10 @@ function addMaster(type) {
   if (type === 'employees') {
     data.employees.push({ id: uid(), name, profile: {}, family: [], memo: '', drawing: '' });
   } else if (type === 'partners') {
-    data.partners.push({ id: uid(), name, profile: {}, contacts: [], memo: '', drawing: '' });
+    const kanaInput = document.getElementById('newPartnerKana');
+    const kana = kanaInput ? kanaInput.value.trim() : '';
+    data.partners.push({ id: uid(), name, kana, profile: {}, contacts: [], memo: '', drawing: '' });
+    if (kanaInput) kanaInput.value = '';
   } else {
     data[type].push({ id: uid(), name });
   }
@@ -1819,7 +1926,7 @@ function renderSales() {
   if (data.partners.length === 0) {
     list.innerHTML = '<div class="empty">まだ取引先がありません<div class="empty-hint">↓ マスタ管理から追加してください</div></div>';
   } else {
-    list.innerHTML = data.partners.map(c => `
+    list.innerHTML = sortedPartners().map(c => `
       <div class="entry-item">
         <div class="entry-name entry-name-link" onclick="openPartnerLedger('${c.id}')">${escapeHtml(c.name)} <span style="font-size:11px;color:var(--blue-bright);">▸</span></div>
         <input type="number" inputmode="numeric" class="entry-amount"
@@ -1841,7 +1948,7 @@ function renderPurchase() {
   if (data.partners.length === 0) {
     list.innerHTML = '<div class="empty">まだ取引先がありません<div class="empty-hint">↓ マスタ管理から追加してください</div></div>';
   } else {
-    list.innerHTML = data.partners.map(s => `
+    list.innerHTML = sortedPartners().map(s => `
       <div class="entry-item">
         <div class="entry-name entry-name-link" onclick="openPartnerLedger('${s.id}')">${escapeHtml(s.name)} <span style="font-size:11px;color:var(--blue-bright);">▸</span></div>
         <input type="number" inputmode="numeric" class="entry-amount"
@@ -2062,10 +2169,10 @@ function renderListModalItems() {
 
   let items = [];
   if (type === 'partners') {
-    items = data.partners.filter(p => !q || normalizeForSearch(p.name).includes(q));
+    items = sortedPartners().filter(p => !q || normalizeForSearch(p.name).includes(q) || normalizeForSearch(p.kana || '').includes(q));
     container.innerHTML = renderListRows(items, p => `
       <div class="master-item">
-        <div class="name">${escapeHtml(p.name)} ${(p.memo || p.drawing || (p.contacts && p.contacts.length)) ? '<span style="font-size:11px;color:var(--blue);">📝</span>' : ''}</div>
+        <div class="name">${escapeHtml(p.name)}${p.kana ? `<span style="font-size:11px; color:var(--ink-light); margin-left:6px;">${escapeHtml(p.kana)}</span>` : ''} ${(p.memo || p.drawing || (p.contacts && p.contacts.length)) ? '<span style="font-size:11px;color:var(--blue);">📝</span>' : ''}</div>
         <button class="btn-detail btn-sm" onclick="openPartnerLedger('${p.id}')">📊 取引</button>
         <button class="btn-detail btn-sm" onclick="openPartnerDetail('partners', '${p.id}')">📝 編集</button>
         <button class="btn btn-danger" onclick="removeMaster('partners', '${p.id}')">削除</button>
@@ -2496,6 +2603,7 @@ function openPartnerDetail(type, id) {
       <div class="modal-section-title">基本情報</div>
       <div class="form-grid">
         <div style="grid-column: 1 / -1;"><label>会社名</label><input type="text" id="pt_name" value="${escapeHtml(partner.name)}"></div>
+        <div style="grid-column: 1 / -1;"><label>フリガナ（あいうえお順に使われます）</label><input type="text" id="pt_kana" value="${escapeHtml(partner.kana || '')}" placeholder="例：トウキョウエレクトロン"></div>
         <div><label>郵便番号</label><input type="text" id="pt_postal" value="${escapeHtml(p.postal || '')}" placeholder="〒"></div>
         <div><label>電話番号</label><input type="text" id="pt_phone" value="${escapeHtml(p.phone || '')}"></div>
         <div style="grid-column: 1 / -1;"><label>住所</label><input type="text" id="pt_address" value="${escapeHtml(p.address || '')}"></div>
@@ -2601,6 +2709,8 @@ function savePartnerDetail(type, id) {
   const partner = data[type].find(x => x.id === id);
   if (!partner) return;
   partner.name = document.getElementById('pt_name').value || partner.name;
+  const kanaEl = document.getElementById('pt_kana');
+  if (kanaEl) partner.kana = kanaEl.value.trim();
   const fields = ['postal', 'phone', 'address', 'fax', 'email',
                    'invoiceNumber', 'paymentMethod', 'closingDay', 'paymentDay',
                    'bankName', 'bankBranch', 'bankType', 'bankNumber', 'bankHolder'];
@@ -2858,6 +2968,15 @@ function normalizeForSearch(s) {
   return t.toLowerCase().replace(/\s+/g, '');
 }
 
+// 取引先をあいうえお順にソート（フリガナ優先、無ければ名前）
+function sortedPartners() {
+  return [...data.partners].sort((a, b) => {
+    const ka = normalizeForSearch(a.kana || a.name);
+    const kb = normalizeForSearch(b.kana || b.name);
+    return ka.localeCompare(kb, 'ja');
+  });
+}
+
 let pendingDelete = null;
 function showConfirm(title, message) {
   document.getElementById('confirmTitle').textContent = title;
@@ -2943,7 +3062,7 @@ function exportToExcel() {
 
   // --- シート2：売上（取引先×月） ---
   const salesData = [['取引先', ...months.map(monthShort), '合計']];
-  data.partners.forEach(p => {
+  sortedPartners().forEach(p => {
     const row = [p.name];
     let sum = 0;
     months.forEach(ym => {
@@ -2964,7 +3083,7 @@ function exportToExcel() {
 
   // --- シート3：買掛（取引先×月） ---
   const purchaseData = [['取引先', ...months.map(monthShort), '合計']];
-  data.partners.forEach(p => {
+  sortedPartners().forEach(p => {
     const row = [p.name];
     let sum = 0;
     months.forEach(ym => {
@@ -3084,11 +3203,8 @@ function confirmReset() {
 }
 
 // 開発版：即座にローカルデータを読み込んで表示
-loadData();
-renderAll();
-updateExportLabel();
-setSyncStatus('synced', '開発版(端末内)');
-window.addEventListener('resize', () => renderChart());
+// データ読み込みは auth.onAuthStateChanged → subscribeToData() 経由
+window.addEventListener('resize', () => { if (currentUser) renderChart(); });
 </script>
 </body>
 </html>
