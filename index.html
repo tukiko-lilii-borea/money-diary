@@ -304,6 +304,173 @@
     overflow: hidden;
     color: white;
   }
+  /* 今日の予定カード */
+  .today-card {
+    background: linear-gradient(135deg, var(--pink) 0%, var(--peach) 100%);
+    border: 2px solid var(--ink);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 5px 5px 0 var(--ink);
+  }
+  /* カレンダー */
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+  .cal-head {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 0;
+    color: var(--ink-soft);
+  }
+  .cal-head.sun { color: var(--red); }
+  .cal-head.sat { color: var(--blue); }
+  .cal-cell {
+    aspect-ratio: 1;
+    border: 1.5px solid var(--line-strong);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 4px 2px;
+    cursor: pointer;
+    font-size: 13px;
+    position: relative;
+    background: white;
+    transition: all .12s;
+  }
+  .cal-cell:active { transform: scale(0.95); }
+  .cal-cell.empty { border: none; background: transparent; cursor: default; }
+  .cal-cell.today { background: var(--peach-soft); border-color: var(--orange); border-width: 2px; }
+  .cal-cell.selected { background: var(--blue); color: white; border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+  .cal-cell .cal-day { font-weight: 600; }
+  .cal-cell.sun .cal-day { color: var(--red); }
+  .cal-cell.sat .cal-day { color: var(--blue); }
+  .cal-cell.selected .cal-day { color: white; }
+  .cal-dots {
+    display: flex;
+    gap: 2px;
+    margin-top: 2px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .cal-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--red); }
+  .cal-dot.task { background: var(--blue); }
+  .cal-dot.bday { background: var(--orange); }
+  .sched-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1.5px dashed var(--line-strong);
+  }
+  .sched-item:last-child { border-bottom: none; }
+  .sched-check {
+    width: 24px; height: 24px;
+    border: 2px solid var(--ink);
+    border-radius: 7px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    background: white;
+  }
+  .sched-check.done { background: var(--blue); color: white; }
+  .sched-text { flex: 1; font-size: 15px; }
+  .sched-text.done { text-decoration: line-through; color: var(--ink-light); }
+  .sched-badge {
+    font-size: 10px; padding: 2px 8px;
+    background: var(--pink-soft); border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    color: var(--ink-soft); white-space: nowrap;
+  }
+  .sched-badge.bday { background: var(--peach); }
+  .today-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .today-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .today-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+  .today-emoji { font-size: 32px; }
+  .today-event {
+    background: white;
+    border: 1.5px solid var(--ink);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .today-event:last-child { margin-bottom: 0; }
+  .today-empty {
+    background: rgba(255,255,255,0.6);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  /* タスクカード */
+  .task-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 2px solid var(--ink);
+    box-shadow: 5px 5px 0 var(--pink);
+  }
+  .task-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1.5px dashed var(--line-strong);
+  }
+  .task-item:last-child { border-bottom: none; }
+  .task-check {
+    width: 26px; height: 26px;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    background: white;
+    transition: all .12s;
+  }
+  .task-check.done {
+    background: var(--accent, #5b6f4e);
+    background: #7ea86f;
+    color: white;
+  }
+  .task-text {
+    flex: 1; font-size: 15px; font-weight: 500;
+  }
+  .task-text.done {
+    text-decoration: line-through;
+    color: var(--ink-light);
+  }
+  .task-badge {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--orange);
+    color: var(--ink);
+    border: 1.5px solid var(--ink);
+    font-family: 'DM Mono', monospace;
+    white-space: nowrap;
+  }
   .dash-hero::before {
     content: '';
     position: absolute;
@@ -986,6 +1153,7 @@
 
 <nav class="tabs">
   <button class="tab active" data-view="dashboard">✨ Home</button>
+  <button class="tab" data-view="schedule">📅 予定</button>
   <button class="tab" data-view="sales">💖 売上</button>
   <button class="tab" data-view="annual">📅 年間売上</button>
   <button class="tab" data-view="purchase">🌸 買掛</button>
@@ -1001,6 +1169,30 @@
 
   <!-- Dashboard -->
   <section class="view active" id="view-dashboard">
+
+    <!-- 今日の予定 -->
+    <div class="today-card">
+      <div class="today-header">
+        <div>
+          <div class="today-date" id="todayDate">-</div>
+          <div class="today-label">本日の予定 ♡</div>
+        </div>
+        <div class="today-emoji">📅</div>
+      </div>
+      <div id="todayEvents"></div>
+      <button class="btn btn-soft" style="width:100%; margin-top:12px;" onclick="switchView('schedule')">📅 予定・タスクを管理する →</button>
+    </div>
+
+    <!-- メモ（複数行） -->
+    <div class="task-card">
+      <h2 style="margin-bottom: 10px;">メモ</h2>
+      <div class="input-row" style="margin-bottom: 10px;">
+        <input type="text" id="newMemoText" placeholder="メモを入力..." onkeydown="if(event.key==='Enter')addMemo()">
+        <button class="btn" onclick="addMemo()">追加 +</button>
+      </div>
+      <div id="memoList"></div>
+    </div>
+
     <div class="dash-hero">
       <div class="dash-hero-content">
         <div class="dash-hero-label">This Month's Profit ♡</div>
@@ -1032,6 +1224,35 @@
     <div class="chart-wrap">
       <h2>12ヶ月の推移</h2>
       <canvas id="monthlyChart"></canvas>
+    </div>
+  </section>
+
+  <!-- Schedule -->
+  <section class="view" id="view-schedule">
+    <!-- カレンダー -->
+    <div class="card">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+        <button class="ym-picker" style="border:none; box-shadow:none; background:transparent; padding:0;"><button onclick="changeCalMonth(-1)" style="background:var(--pink-soft); border:2px solid var(--ink); width:36px; height:36px; border-radius:50%; font-size:16px; cursor:pointer; font-family:'Fraunces',serif; font-weight:700;">‹</button></button>
+        <div style="font-family:'Fraunces',serif; font-style:italic; font-size:19px; font-weight:600;" id="calMonthLabel">-</div>
+        <button onclick="changeCalMonth(1)" style="background:var(--pink-soft); border:2px solid var(--ink); width:36px; height:36px; border-radius:50%; font-size:16px; cursor:pointer; font-family:'Fraunces',serif; font-weight:700;">›</button>
+      </div>
+      <div id="calendarGrid" class="cal-grid"></div>
+    </div>
+
+    <!-- 選択日の予定・タスク -->
+    <div class="card">
+      <h2 id="selectedDateLabel">日付を選択</h2>
+      <div class="input-row" style="margin-bottom:10px; flex-wrap:wrap;">
+        <input type="text" id="newSchedItem" placeholder="予定・タスクを入力..." style="flex:1 1 100%;" onkeydown="if(event.key==='Enter')addScheduleItem()">
+        <select id="newSchedRepeat" style="flex:1;">
+          <option value="none">1回だけ</option>
+          <option value="daily">毎日</option>
+          <option value="weekly">毎週この曜日</option>
+          <option value="monthly">毎月この日</option>
+        </select>
+        <button class="btn" onclick="addScheduleItem()">追加 +</button>
+      </div>
+      <div id="scheduleDayList"></div>
     </div>
   </section>
 
@@ -1297,13 +1518,15 @@ function doLogout() {
 // ============== Data (Firestore同期) ==============
 let data = {
   partners: [], customers: [], suppliers: [], employees: [],
-  loans: [], fixed: [], monthly: {}
+  loans: [], fixed: [], monthly: {}, tasks: [], homeMemo: ''
 };
 
 function normalizeData() {
   data.customers ||= []; data.suppliers ||= []; data.employees ||= [];
   data.loans ||= []; data.fixed ||= []; data.monthly ||= {};
   data.partners ||= [];
+  data.tasks ||= [];
+  data.homeMemo ||= '';
 
   // 旧データ（得意先/仕入先）を取引先に統合（1回だけ）
   if (data.customers.length > 0 || data.suppliers.length > 0) {
@@ -1345,6 +1568,21 @@ function normalizeData() {
     f.memo ||= '';
     f.drawing ||= '';
   });
+
+  // タスクを新スケジュール構造に移行
+  data.tasks ||= [];
+  data.tasks.forEach(t => {
+    t.doneDates ||= [];
+    if (t.date === undefined) {
+      // 旧構造: dueDate/done/repeat(none|monthly) → 新構造
+      t.date = t.dueDate || t.createdAt || todayFullDate();
+      if (t.done && t.repeat === 'none') t.doneDates.push(t.date);
+      delete t.dueDate; delete t.done; delete t.createdAt; delete t.lastDoneMonth;
+    }
+    if (!['none','daily','weekly','monthly'].includes(t.repeat)) t.repeat = 'none';
+  });
+  // メモを複数行構造に移行
+  normalizeMemoData();
 }
 
 function getDocRef() {
@@ -1602,6 +1840,8 @@ function updateEntry(category, id, val) {
 function renderAll() {
   document.getElementById('ymDisplay').textContent = ymLabel(currentYM);
   renderDashboard();
+  renderHomeWidgets();
+  renderSchedule();
   renderSales();
   renderAnnual();
   renderPurchase();
@@ -1611,6 +1851,262 @@ function renderAll() {
   renderFixedView();
   renderMonthlyMemo();
   renderMaster();
+}
+
+// ============== ホームウィジェット（今日の予定・タスク・メモ・誕生日）==============
+function renderHomeWidgets() {
+  renderTodayEvents();
+  renderMemoList();
+}
+
+// ============== メモ（複数行・ゴミ箱削除） ==============
+function normalizeMemoData() {
+  // 旧homeMemo（文字列）を配列memosに移行
+  if (typeof data.homeMemo === 'string' && data.homeMemo.trim()) {
+    data.memos ||= [];
+    data.memos.push({ id: uid(), text: data.homeMemo.trim() });
+    data.homeMemo = '';
+  }
+  data.memos ||= [];
+}
+function addMemo() {
+  const input = document.getElementById('newMemoText');
+  const text = input.value.trim();
+  if (!text) return;
+  data.memos ||= [];
+  data.memos.push({ id: uid(), text });
+  input.value = '';
+  saveData();
+  renderMemoList();
+}
+function removeMemo(id) {
+  data.memos = (data.memos || []).filter(m => m.id !== id);
+  saveData();
+  renderMemoList();
+}
+function renderMemoList() {
+  const list = document.getElementById('memoList');
+  if (!list) return;
+  data.memos ||= [];
+  if (data.memos.length === 0) {
+    list.innerHTML = '<div style="text-align:center; padding:14px; color:var(--ink-light); font-size:13px;">メモはまだありません🌷</div>';
+    return;
+  }
+  list.innerHTML = data.memos.map(m => `
+    <div class="sched-item">
+      <div class="sched-text">${escapeHtml(m.text)}</div>
+      <button class="btn btn-danger" onclick="removeMemo('${m.id}')">🗑</button>
+    </div>
+  `).join('');
+}
+
+// ============== 今日の予定 ==============
+function renderTodayEvents() {
+  const now = new Date();
+  const dateEl = document.getElementById('todayDate');
+  const days = ['日','月','火','水','木','金','土'];
+  if (dateEl) dateEl.textContent = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日（${days[now.getDay()]}）`;
+
+  const todayStr = todayFullDate();
+  const events = collectDayItems(todayStr);
+
+  const container = document.getElementById('todayEvents');
+  if (!container) return;
+  if (events.length === 0) {
+    container.innerHTML = '<div class="today-empty">今日の予定はありません☕ ゆっくりいこう</div>';
+  } else {
+    container.innerHTML = events.map(e => `
+      <div class="today-event"><span>${e.icon}</span><span>${escapeHtml(e.text)}</span></div>
+    `).join('');
+  }
+}
+
+function todayFullDate() {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+function currentYMonth() {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+}
+
+// ============== スケジュール（タスク＋予定） ==============
+// data.tasks の各項目: {id, text, repeat:'none'|'daily'|'weekly'|'monthly', date:'YYYY-MM-DD', doneDates:[...]}
+let selectedDate = todayFullDate();
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth(); // 0-indexed
+
+// 指定日にこのタスクが該当するか
+function taskMatchesDate(task, dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const base = task.date ? new Date(task.date + 'T00:00:00') : null;
+  switch (task.repeat) {
+    case 'none':
+      return task.date === dateStr;
+    case 'daily':
+      return base ? d >= base : true;
+    case 'weekly':
+      return base ? (d.getDay() === base.getDay() && d >= base) : false;
+    case 'monthly':
+      return base ? (d.getDate() === base.getDate() && d >= base) : false;
+    default:
+      return false;
+  }
+}
+function isTaskDoneOn(task, dateStr) {
+  return (task.doneDates || []).includes(dateStr);
+}
+
+// 指定日の全項目（誕生日＋タスク）を集める
+function collectDayItems(dateStr) {
+  const items = [];
+  const d = new Date(dateStr + 'T00:00:00');
+  // 誕生日（社員本人＋家族）
+  data.employees.forEach(e => {
+    if (e.profile && e.profile.leaveDate) return; // 退職者除外
+    const check = (name, birthday, who) => {
+      if (!birthday) return;
+      const b = new Date(birthday);
+      if (isNaN(b.getTime())) return;
+      if (b.getMonth() === d.getMonth() && b.getDate() === d.getDate()) {
+        const age = d.getFullYear() - b.getFullYear();
+        items.push({ type:'bday', icon:'🎂', text:`${name}さん${who?'（'+who+'）':''}の誕生日（${age}歳）`, repeat:'birthday' });
+      }
+    };
+    check(e.name, e.profile.birthday, '');
+    (e.family || []).forEach(f => {
+      if (f.name && f.birthday) check(f.name, f.birthday, e.name+'さんの'+(f.relation||'家族'));
+    });
+  });
+  // タスク・予定
+  (data.tasks || []).forEach(t => {
+    if (taskMatchesDate(t, dateStr)) {
+      const repeatLabel = {daily:'毎日', weekly:'毎週', monthly:'毎月'}[t.repeat] || '';
+      const icon = t.repeat === 'none' ? '📌' : '🔁';
+      items.push({ type:'task', icon, text: t.text + (repeatLabel?`（${repeatLabel}）`:''), task: t, done: isTaskDoneOn(t, dateStr), repeat: t.repeat });
+    }
+  });
+  return items;
+}
+
+function addScheduleItem() {
+  const input = document.getElementById('newSchedItem');
+  const text = input.value.trim();
+  if (!text) return;
+  const repeat = document.getElementById('newSchedRepeat').value;
+  data.tasks ||= [];
+  data.tasks.push({
+    id: uid(), text, repeat,
+    date: selectedDate,
+    doneDates: []
+  });
+  input.value = '';
+  saveData();
+  renderSchedule();
+  renderTodayEvents();
+}
+function toggleScheduleItem(taskId, dateStr) {
+  const t = data.tasks.find(x => x.id === taskId);
+  if (!t) return;
+  t.doneDates ||= [];
+  const idx = t.doneDates.indexOf(dateStr);
+  if (idx >= 0) t.doneDates.splice(idx, 1);
+  else t.doneDates.push(dateStr);
+  saveData();
+  renderScheduleDayList();
+  renderTodayEvents();
+}
+function removeScheduleItem(taskId) {
+  if (!confirm('この予定・タスクを削除しますか?（繰り返しの場合は全ての日から消えます）')) return;
+  data.tasks = data.tasks.filter(x => x.id !== taskId);
+  saveData();
+  renderSchedule();
+  renderTodayEvents();
+}
+
+// カレンダー描画
+function changeCalMonth(delta) {
+  calMonth += delta;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+}
+function selectCalDate(dateStr) {
+  selectedDate = dateStr;
+  renderCalendar();
+  renderScheduleDayList();
+}
+function renderSchedule() {
+  renderCalendar();
+  renderScheduleDayList();
+}
+function renderCalendar() {
+  const label = document.getElementById('calMonthLabel');
+  if (label) label.textContent = `${calYear}年 ${calMonth+1}月`;
+  const grid = document.getElementById('calendarGrid');
+  if (!grid) return;
+
+  const dayHeaders = ['日','月','火','水','木','金','土'];
+  let html = dayHeaders.map((d,i) => `<div class="cal-head ${i===0?'sun':''} ${i===6?'sat':''}">${d}</div>`).join('');
+
+  const firstDay = new Date(calYear, calMonth, 1);
+  const startWeekday = firstDay.getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const todayStr = todayFullDate();
+
+  // 空セル
+  for (let i = 0; i < startWeekday; i++) html += '<div class="cal-cell empty"></div>';
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const wd = new Date(calYear, calMonth, day).getDay();
+    const items = collectDayItems(dateStr);
+    const hasTask = items.some(i => i.type === 'task');
+    const hasBday = items.some(i => i.type === 'bday');
+    const classes = ['cal-cell'];
+    if (wd === 0) classes.push('sun');
+    if (wd === 6) classes.push('sat');
+    if (dateStr === todayStr) classes.push('today');
+    if (dateStr === selectedDate) classes.push('selected');
+    let dots = '';
+    if (hasTask) dots += '<div class="cal-dot task"></div>';
+    if (hasBday) dots += '<div class="cal-dot bday"></div>';
+    html += `<div class="${classes.join(' ')}" onclick="selectCalDate('${dateStr}')">
+      <div class="cal-day">${day}</div>
+      <div class="cal-dots">${dots}</div>
+    </div>`;
+  }
+  grid.innerHTML = html;
+}
+function renderScheduleDayList() {
+  const label = document.getElementById('selectedDateLabel');
+  const list = document.getElementById('scheduleDayList');
+  if (!list) return;
+  const d = new Date(selectedDate + 'T00:00:00');
+  const days = ['日','月','火','水','木','金','土'];
+  if (label) label.textContent = `${d.getMonth()+1}月${d.getDate()}日（${days[d.getDay()]}）の予定`;
+
+  const items = collectDayItems(selectedDate);
+  if (items.length === 0) {
+    list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--ink-light); font-size:13px;">この日の予定はありません✨<br>上から追加できます</div>';
+    return;
+  }
+  list.innerHTML = items.map(item => {
+    if (item.type === 'bday') {
+      return `<div class="sched-item">
+        <span style="font-size:20px;">🎂</span>
+        <div class="sched-text">${escapeHtml(item.text)}</div>
+        <span class="sched-badge bday">誕生日</span>
+      </div>`;
+    }
+    const repeatLabel = {none:'', daily:'毎日', weekly:'毎週', monthly:'毎月'}[item.repeat] || '';
+    return `<div class="sched-item">
+      <div class="sched-check ${item.done?'done':''}" onclick="toggleScheduleItem('${item.task.id}','${selectedDate}')">${item.done?'✓':''}</div>
+      <div class="sched-text ${item.done?'done':''}">${escapeHtml(item.task.text)}</div>
+      ${repeatLabel?`<span class="sched-badge">🔁${repeatLabel}</span>`:''}
+      <button class="btn btn-danger" onclick="removeScheduleItem('${item.task.id}')">🗑</button>
+    </div>`;
+  }).join('');
 }
 
 // ============== Annual Sales (事業年度/暦年 切替) ==============
@@ -2178,13 +2674,21 @@ function renderListModalItems() {
         <button class="btn btn-danger" onclick="removeMaster('partners', '${p.id}')">削除</button>
       </div>`, data.partners.length);
   } else if (type === 'employees') {
-    items = data.employees.filter(e => !q || normalizeForSearch(e.name).includes(q));
-    container.innerHTML = renderListRows(items, e => `
+    const sortedEmps = [...data.employees].sort((a, b) => {
+      const ka = normalizeForSearch((a.profile && a.profile.furigana) || a.name);
+      const kb = normalizeForSearch((b.profile && b.profile.furigana) || b.name);
+      return ka.localeCompare(kb, 'ja');
+    });
+    items = sortedEmps.filter(e => !q || normalizeForSearch(e.name).includes(q) || normalizeForSearch((e.profile && e.profile.furigana) || '').includes(q));
+    container.innerHTML = renderListRows(items, e => {
+      const retired = e.profile && e.profile.leaveDate;
+      return `
       <div class="master-item">
-        <div class="name">${escapeHtml(e.name)}</div>
+        <div class="name">${escapeHtml(e.name)}${e.profile && e.profile.furigana ? `<span style="font-size:11px; color:var(--ink-light); margin-left:6px;">${escapeHtml(e.profile.furigana)}</span>` : ''} ${retired ? '<span style="font-size:10px; background:var(--ink-light); color:white; padding:2px 7px; border-radius:8px; margin-left:4px;">退職</span>' : ''}</div>
         <button class="btn-detail btn-sm" onclick="openEmployeeDetail('${e.id}')">プロフィール</button>
         <button class="btn btn-danger" onclick="removeMaster('employees', '${e.id}')">削除</button>
-      </div>`, data.employees.length);
+      </div>`;
+    }, data.employees.length);
   } else if (type === 'loans') {
     items = data.loans.filter(l => !q || normalizeForSearch(l.name).includes(q));
     container.innerHTML = renderListRows(items, l => `
@@ -2394,6 +2898,8 @@ function openEmployeeDetail(id) {
         <div><label>生年月日</label><input type="date" id="emp_birthday" value="${p.birthday || ''}"></div>
         <div><label>電話番号</label><input type="text" id="emp_phone" value="${escapeHtml(p.phone || '')}"></div>
         <div><label>入社日</label><input type="date" id="emp_joinDate" value="${p.joinDate || ''}"></div>
+        <div><label>退職日（退職時に入力）</label><input type="date" id="emp_leaveDate" value="${p.leaveDate || ''}"></div>
+        <div><label>在籍状況</label><input type="text" id="emp_status" value="${escapeHtml(p.leaveDate ? '退職' : '在籍中')}" readonly style="background: var(--peach-soft);"></div>
         <div style="grid-column: 1 / -1;"><label>郵便番号</label><input type="text" id="emp_postal" value="${escapeHtml(p.postal || '')}" placeholder="〒"></div>
         <div style="grid-column: 1 / -1;"><label>住所</label><input type="text" id="emp_address" value="${escapeHtml(p.address || '')}"></div>
       </div>
@@ -2420,6 +2926,7 @@ function openEmployeeDetail(id) {
 
     <div class="modal-section">
       <div class="modal-section-title">家族情報 <button class="btn btn-pink btn-sm" onclick="addFamilyRow('${id}')" style="margin-left: 8px;">+ 家族追加</button></div>
+      <p style="font-size: 11px; color: var(--ink-light); margin: 0 0 8px;">生年月日を入れると年齢が自動表示されます（子ども手当の管理に便利）</p>
       <div id="familyList_${id}" class="family-list"></div>
     </div>
 
@@ -2456,6 +2963,17 @@ function openEmployeeDetail(id) {
   }, 50);
 }
 
+function calcAge(birthday) {
+  if (!birthday) return null;
+  const b = new Date(birthday);
+  if (isNaN(b.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - b.getFullYear();
+  const m = now.getMonth() - b.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < b.getDate())) age--;
+  return age;
+}
+
 function renderFamilyList(empId) {
   const emp = data.employees.find(e => e.id === empId);
   if (!emp) return;
@@ -2465,14 +2983,18 @@ function renderFamilyList(empId) {
     list.innerHTML = '<div style="font-size: 12px; color: var(--ink-light); padding: 8px 0;">家族情報なし</div>';
     return;
   }
-  list.innerHTML = emp.family.map((f, i) => `
-    <div class="family-row">
+  list.innerHTML = emp.family.map((f, i) => {
+    const age = calcAge(f.birthday);
+    return `
+    <div class="family-row" style="grid-template-columns: 1fr 1.3fr 1.3fr auto auto;">
       <input type="text" placeholder="続柄" value="${escapeHtml(f.relation || '')}" onchange="updateFamily('${empId}', ${i}, 'relation', this.value)">
       <input type="text" placeholder="氏名" value="${escapeHtml(f.name || '')}" onchange="updateFamily('${empId}', ${i}, 'name', this.value)">
       <input type="date" value="${f.birthday || ''}" onchange="updateFamily('${empId}', ${i}, 'birthday', this.value)">
+      <div style="font-size: 13px; font-weight: 700; color: var(--blue); min-width: 44px; text-align: center; align-self: center;">${age !== null ? age + '歳' : '−'}</div>
       <button class="btn btn-danger" onclick="removeFamily('${empId}', ${i})">×</button>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 function addFamilyRow(empId) {
   const emp = data.employees.find(e => e.id === empId);
@@ -2484,6 +3006,7 @@ function updateFamily(empId, idx, field, val) {
   const emp = data.employees.find(e => e.id === empId);
   if (!emp || !emp.family[idx]) return;
   emp.family[idx][field] = val;
+  if (field === 'birthday') renderFamilyList(empId); // 年齢を即更新
 }
 function removeFamily(empId, idx) {
   const emp = data.employees.find(e => e.id === empId);
@@ -2495,7 +3018,7 @@ function removeFamily(empId, idx) {
 function saveEmployeeDetail(id) {
   const emp = data.employees.find(e => e.id === id);
   if (!emp) return;
-  const fields = ['furigana', 'birthday', 'phone', 'joinDate', 'postal', 'address',
+  const fields = ['furigana', 'birthday', 'phone', 'joinDate', 'leaveDate', 'postal', 'address',
                   'emName', 'emRelation', 'emPhone',
                   'commuteFrom', 'commuteTo', 'commuteRoute', 'commuteFee'];
   fields.forEach(f => {
@@ -2505,6 +3028,7 @@ function saveEmployeeDetail(id) {
   emp.memo = document.getElementById('emp_memo').value;
   saveData();
   closeDetailModal();
+  renderAll();
   alert('保存しました ♡');
 }
 
