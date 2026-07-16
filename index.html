@@ -317,37 +317,43 @@
   .cal-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
+    gap: 3px;
+    width: 100%;
   }
   .cal-head {
     text-align: center;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
-    padding: 6px 0;
+    padding: 4px 0;
     color: var(--ink-soft);
+    min-width: 0;
   }
   .cal-head.sun { color: var(--red); }
   .cal-head.sat { color: var(--blue); }
   .cal-cell {
     aspect-ratio: 1;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
     border: 1.5px solid var(--line-strong);
-    border-radius: 10px;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: 4px 2px;
+    padding: 3px 1px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
     position: relative;
     background: white;
     transition: all .12s;
+    overflow: hidden;
   }
   .cal-cell:active { transform: scale(0.95); }
   .cal-cell.empty { border: none; background: transparent; cursor: default; }
   .cal-cell.today { background: var(--peach-soft); border-color: var(--orange); border-width: 2px; }
-  .cal-cell.selected { background: var(--blue); color: white; border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
-  .cal-cell .cal-day { font-weight: 600; }
+  .cal-cell.selected { background: var(--blue); color: white; border-color: var(--ink); box-shadow: 1px 1px 0 var(--ink); }
+  .cal-cell .cal-day { font-weight: 600; font-size: 13px; line-height: 1.1; }
   .cal-cell.sun .cal-day { color: var(--red); }
   .cal-cell.sat .cal-day { color: var(--blue); }
   .cal-cell.selected .cal-day { color: white; }
@@ -358,7 +364,7 @@
     flex-wrap: wrap;
     justify-content: center;
   }
-  .cal-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--red); }
+  .cal-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--red); }
   .cal-dot.task { background: var(--blue); }
   .cal-dot.bday { background: var(--orange); }
   .sched-item {
@@ -404,6 +410,20 @@
   }
   .partner-tag.sales { background: var(--pink-soft); color: var(--ink-soft); }
   .partner-tag.purchase { background: var(--peach-soft); color: var(--ink-soft); }
+  .gojuon-header {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: white;
+    background: var(--blue);
+    border: 1.5px solid var(--ink);
+    border-radius: 7px;
+    padding: 2px 10px;
+    margin: 8px 0 4px;
+    display: inline-block;
+    box-shadow: 1.5px 1.5px 0 var(--ink);
+  }
+  .gojuon-header:first-child { margin-top: 0; }
   .today-header {
     display: flex; justify-content: space-between; align-items: flex-start;
     margin-bottom: 14px;
@@ -684,14 +704,15 @@
 
   .entry-list { margin-top: 8px; }
   .entry-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1.5px dashed var(--line-strong);
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--line-strong);
   }
   .entry-item:last-child { border-bottom: none; }
   .entry-name {
-    flex: 1; font-size: 16px;
+    flex: 1; font-size: 15px;
     color: var(--ink); font-weight: 600;
+    line-height: 1.3;
   }
   .entry-name-link {
     cursor: pointer;
@@ -700,10 +721,10 @@
   }
   .entry-name-link:active { color: var(--blue); }
   .entry-amount {
-    width: 140px;
-    padding: 10px 12px;
+    width: 130px;
+    padding: 7px 10px;
     border: 2px solid var(--ink);
-    border-radius: 10px;
+    border-radius: 9px;
     font-family: 'DM Mono', monospace;
     text-align: right;
     font-size: 15px;
@@ -2443,14 +2464,14 @@ function renderSales() {
   if (salesPartners.length === 0) {
     list.innerHTML = '<div class="empty">売上対象の取引先がありません<div class="empty-hint">マスタで「売上あり」にチェックすると表示されます</div></div>';
   } else {
-    list.innerHTML = salesPartners.map(c => `
+    list.innerHTML = withGojuonHeaders(salesPartners, p => p.kana || p.name, c => `
       <div class="entry-item">
         <div class="entry-name entry-name-link" onclick="openPartnerLedger('${c.id}')">${escapeHtml(c.name)} <span style="font-size:11px;color:var(--blue-bright);">▸</span></div>
         <input type="number" inputmode="numeric" class="entry-amount"
                value="${m.sales[c.id] || ''}" placeholder="0"
                onchange="updateEntry('sales', '${c.id}', this.value)">
       </div>
-    `).join('');
+    `);
   }
   renderSalesTotal();
 }
@@ -2466,14 +2487,14 @@ function renderPurchase() {
   if (purchasePartners.length === 0) {
     list.innerHTML = '<div class="empty">買掛対象の取引先がありません<div class="empty-hint">マスタで「買掛あり」にチェックすると表示されます</div></div>';
   } else {
-    list.innerHTML = purchasePartners.map(s => `
+    list.innerHTML = withGojuonHeaders(purchasePartners, p => p.kana || p.name, s => `
       <div class="entry-item">
         <div class="entry-name entry-name-link" onclick="openPartnerLedger('${s.id}')">${escapeHtml(s.name)} <span style="font-size:11px;color:var(--blue-bright);">▸</span></div>
         <input type="number" inputmode="numeric" class="entry-amount"
                value="${m.purchases[s.id] || ''}" placeholder="0"
                onchange="updateEntry('purchases', '${s.id}', this.value)">
       </div>
-    `).join('');
+    `);
   }
   renderPurchaseTotal();
 }
@@ -2645,23 +2666,27 @@ function renderMaster() {
 // ============== 一覧・編集モーダル ==============
 let currentListModalType = null;
 let listModalSearch = '';
+let returnToListType = null; // 編集後に戻る一覧の種類
+let savedListSearch = '';    // 戻ったときの検索文字列を保持
 
 function openListModal(type) {
   currentListModalType = type;
-  listModalSearch = '';
+  // 戻ってきた場合は検索を復元、新規オープンならクリア
+  listModalSearch = (returnToListType === type) ? savedListSearch : '';
+  returnToListType = null;
   const titles = {
     partners: '取引先の一覧',
     employees: '社員の一覧',
     loans: '融資の一覧',
     fixed: '固定費の一覧'
   };
-  const showSearch = (type === 'partners'); // 件数が多くなる取引先だけ検索窓
+  const showSearch = (type === 'partners');
   openDetailModal(`
     <h3>📋 ${titles[type]}</h3>
     ${showSearch ? `
       <div style="margin-bottom: 14px;">
         <input type="text" id="listSearchInput" placeholder="🔍 名前で検索（半角・全角どちらでもOK）"
-               oninput="onListSearch(this.value)" style="width:100%;">
+               value="${escapeHtml(listModalSearch)}" oninput="onListSearch(this.value)" style="width:100%;">
       </div>` : ''}
     <div id="listModalItems"></div>
     <div class="modal-actions">
@@ -2673,7 +2698,26 @@ function openListModal(type) {
 function closeListModal() {
   currentListModalType = null;
   listModalSearch = '';
-  closeDetailModal();
+  returnToListType = null;
+  savedListSearch = '';
+  document.getElementById('detailModal').classList.remove('show');
+  saveData();
+}
+// 一覧から編集を開く（戻り先を記憶）
+function openFromList(type, openFn) {
+  returnToListType = type;
+  savedListSearch = listModalSearch;
+  currentListModalType = null; // 一旦解除（編集画面表示のため）
+  openFn();
+}
+// 編集画面から一覧に戻る（戻り先があれば再オープン）
+function backToListIfNeeded() {
+  if (returnToListType) {
+    const t = returnToListType;
+    openListModal(t); // openListModal内でreturnToListType考慮
+    return true;
+  }
+  return false;
 }
 function onListSearch(val) {
   listModalSearch = val;
@@ -2692,9 +2736,9 @@ function renderListModalItems() {
       <div class="master-item">
         <div class="name">${escapeHtml(p.name)}${p.kana ? `<span style="font-size:11px; color:var(--ink-light); margin-left:6px;">${escapeHtml(p.kana)}</span>` : ''}${p.hasSales ? '<span class="partner-tag sales">売</span>' : ''}${p.hasPurchase ? '<span class="partner-tag purchase">買</span>' : ''} ${(p.memo || p.drawing || (p.contacts && p.contacts.length)) ? '<span style="font-size:11px;color:var(--blue);">📝</span>' : ''}</div>
         <button class="btn-detail btn-sm" onclick="openPartnerLedger('${p.id}')">📊 取引</button>
-        <button class="btn-detail btn-sm" onclick="openPartnerDetail('partners', '${p.id}')">📝 編集</button>
+        <button class="btn-detail btn-sm" onclick="openFromList('partners', () => openPartnerDetail('partners', '${p.id}'))">📝 編集</button>
         <button class="btn btn-danger" onclick="removeMaster('partners', '${p.id}')">削除</button>
-      </div>`, data.partners.length);
+      </div>`, data.partners.length, p => p.kana || p.name);
   } else if (type === 'employees') {
     const sortedEmps = [...data.employees].sort((a, b) => {
       const ka = normalizeForSearch((a.profile && a.profile.furigana) || a.name);
@@ -2707,17 +2751,17 @@ function renderListModalItems() {
       return `
       <div class="master-item">
         <div class="name">${escapeHtml(e.name)}${e.profile && e.profile.furigana ? `<span style="font-size:11px; color:var(--ink-light); margin-left:6px;">${escapeHtml(e.profile.furigana)}</span>` : ''} ${retired ? '<span style="font-size:10px; background:var(--ink-light); color:white; padding:2px 7px; border-radius:8px; margin-left:4px;">退職</span>' : ''}</div>
-        <button class="btn-detail btn-sm" onclick="openEmployeeDetail('${e.id}')">プロフィール</button>
+        <button class="btn-detail btn-sm" onclick="openFromList('employees', () => openEmployeeDetail('${e.id}'))">プロフィール</button>
         <button class="btn btn-danger" onclick="removeMaster('employees', '${e.id}')">削除</button>
       </div>`;
-    }, data.employees.length);
+    }, data.employees.length, e => (e.profile && e.profile.furigana) || e.name);
   } else if (type === 'loans') {
     items = data.loans.filter(l => !q || normalizeForSearch(l.name).includes(q));
     container.innerHTML = renderListRows(items, l => `
       <div class="master-item">
         <div class="name">${escapeHtml(l.name)}</div>
         <div class="meta">借${yen(l.initialAmount || l.currentBalance)}/残${yen(l.currentBalance)}/月${yen(l.monthlyPayment)}</div>
-        <button class="btn-detail btn-sm" onclick="openLoanDetail('${l.id}')">📝 編集</button>
+        <button class="btn-detail btn-sm" onclick="openFromList('loans', () => openLoanDetail('${l.id}'))">📝 編集</button>
         <button class="btn btn-danger" onclick="removeLoan('${l.id}')">削除</button>
       </div>`, data.loans.length);
   } else if (type === 'fixed') {
@@ -2726,19 +2770,23 @@ function renderListModalItems() {
       <div class="master-item">
         <div class="name">${escapeHtml(f.name)}</div>
         <div class="meta">${yen(f.amount)}/月</div>
-        <button class="btn-detail btn-sm" onclick="openFixedDetail('${f.id}')">📝 編集</button>
+        <button class="btn-detail btn-sm" onclick="openFromList('fixed', () => openFixedDetail('${f.id}'))">📝 編集</button>
         <button class="btn btn-danger" onclick="removeFixed('${f.id}')">削除</button>
       </div>`, data.fixed.length);
   }
 }
-function renderListRows(items, rowFn, totalCount) {
+function renderListRows(items, rowFn, totalCount, gojuonKeyFn) {
   if (totalCount === 0) {
     return '<div class="empty" style="background:white;">まだ登録がありません</div>';
   }
   if (items.length === 0) {
     return '<div style="text-align:center; padding:24px; color:var(--ink-light);">🔍 検索に一致する項目がありません</div>';
   }
-  return `<div style="max-height: 50vh; overflow-y: auto;">${items.map(rowFn).join('')}</div>
+  // 検索中(listModalSearch)でなく、キー関数がある場合は五十音見出し付き
+  const body = (gojuonKeyFn && !listModalSearch)
+    ? withGojuonHeaders(items, gojuonKeyFn, rowFn)
+    : items.map(rowFn).join('');
+  return `<div style="max-height: 50vh; overflow-y: auto;">${body}</div>
     <div style="font-size:11px; color:var(--ink-light); text-align:right; margin-top:8px;">${items.length}件表示</div>`;
 }
 
@@ -2895,13 +2943,25 @@ function openDetailModal(html) {
   document.getElementById('detailModal').classList.add('show');
 }
 function closeDetailModal() {
+  // 編集画面を一覧から開いていた場合は、閉じずに一覧へ戻る
+  if (returnToListType) {
+    saveData();
+    const t = returnToListType;
+    openListModal(t); // 検索状態も復元される
+    return;
+  }
   document.getElementById('detailModal').classList.remove('show');
-  currentListModalType = null; // 一覧モードも解除
-  // データ保存
+  currentListModalType = null;
   saveData();
 }
 document.getElementById('detailModal').addEventListener('click', e => {
-  if (e.target.id === 'detailModal') closeDetailModal();
+  if (e.target.id === 'detailModal') {
+    // 背景クリックは完全に閉じる（一覧に戻らない）
+    returnToListType = null;
+    document.getElementById('detailModal').classList.remove('show');
+    currentListModalType = null;
+    saveData();
+  }
 });
 
 // ---- 従業員プロフィール ----
@@ -3532,6 +3592,53 @@ function sortedPartners() {
     const kb = normalizeForSearch(b.kana || b.name);
     return ka.localeCompare(kb, 'ja');
   });
+}
+
+// 頭文字から「あ・か・さ・た・な・は・ま・や・ら・わ」の行を判定
+function gojuonRow(str) {
+  const s = normalizeForSearch(str || '');
+  const c = s.charAt(0);
+  if (!c) return '#';
+  const code = c.charCodeAt(0);
+  // ひらがな範囲か
+  if (code >= 0x3041 && code <= 0x309F) {
+    const rows = [
+      ['あ', 'ぁあぃいぅうぇえぉお'],
+      ['か', 'かがきぎくぐけげこご'],
+      ['さ', 'さざしじすずせぜそぞ'],
+      ['た', 'ただちぢっつづてでとど'],
+      ['な', 'なにぬねの'],
+      ['は', 'はばぱひびぴふぶぷへべぺほぼぽ'],
+      ['ま', 'まみむめも'],
+      ['や', 'ゃやゅゆょよ'],
+      ['ら', 'らりるれろ'],
+      ['わ', 'わをんゎ']
+    ];
+    for (const [label, chars] of rows) {
+      if (chars.includes(c)) return label;
+    }
+    return 'あ';
+  }
+  // 英数字
+  if (/[a-z0-9]/.test(c)) return 'A-Z';
+  // その他（漢字など、フリガナ無しの場合）
+  return '#';
+}
+
+// ソート済みリストを行ごとにグループ化して見出し付きHTMLを生成
+function withGojuonHeaders(items, keyFn, rowFn) {
+  let html = '';
+  let currentRow = null;
+  items.forEach(item => {
+    const row = gojuonRow(keyFn(item));
+    if (row !== currentRow) {
+      currentRow = row;
+      const label = row === '#' ? 'その他' : (row === 'A-Z' ? 'A-Z' : row + '行');
+      html += `<div class="gojuon-header">${label}</div>`;
+    }
+    html += rowFn(item);
+  });
+  return html;
 }
 
 let pendingDelete = null;
