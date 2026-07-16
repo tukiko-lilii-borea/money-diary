@@ -756,6 +756,45 @@
     font-size: 18px;
   }
 
+  /* ===== 消費税の内訳（税込・税抜・消費税） ===== */
+  .tax-breakdown {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .tax-row {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 10px 4px;
+    background: white;
+    border: 1.5px solid var(--line-strong);
+    border-radius: 12px;
+    min-width: 0;
+  }
+  .tax-row.tax-main { background: var(--pink-soft); border-color: var(--ink); }
+  .tax-row.tax-vat { background: var(--peach-soft); }
+  .tax-row .tax-lbl {
+    font-size: 10px;
+    color: var(--ink-soft);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .tax-row .tax-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  @media (max-width: 480px) {
+    .tax-row .tax-val { font-size: 12px; }
+    .tax-row { padding: 8px 3px; }
+  }
+
   .empty {
     text-align: center;
     padding: 36px 20px;
@@ -763,10 +802,8 @@
     font-size: 14px;
   }
   .empty::before {
-    content: '🌷';
-    display: block;
-    font-size: 32px;
-    margin-bottom: 8px;
+    content: '';
+    display: none;
   }
   .empty-hint { font-size: 12px; margin-top: 8px; color: var(--ink-light); }
 
@@ -1300,6 +1337,7 @@
       <h2 id="salesMonthLabel">今月の売上</h2>
       <div id="salesList" class="entry-list"></div>
       <div class="total-row"><div class="name">Total ♡</div><div class="val" id="salesTotal">¥0</div></div>
+      <div class="tax-breakdown" id="salesTaxBreak"></div>
     </div>
   </section>
 
@@ -1318,6 +1356,7 @@
       </div>
       <div id="annualTable" class="entry-list"></div>
       <div class="total-row"><div class="name">年間合計 ♡</div><div class="val" id="annualTotal">¥0</div></div>
+      <div class="tax-breakdown" id="annualTaxBreak"></div>
     </div>
   </section>
 
@@ -1327,6 +1366,7 @@
       <h2 id="purchaseMonthLabel">今月の買掛・支払</h2>
       <div id="purchaseList" class="entry-list"></div>
       <div class="total-row"><div class="name">Total ♡</div><div class="val" id="purchaseTotal">¥0</div></div>
+      <div class="tax-breakdown" id="purchaseTaxBreak"></div>
     </div>
   </section>
 
@@ -1345,6 +1385,7 @@
       </div>
       <div id="annualPurchaseTable" class="entry-list"></div>
       <div class="total-row"><div class="name">年間合計 ♡</div><div class="val" id="annualPurchaseTotal">¥0</div></div>
+      <div class="tax-breakdown" id="annualPurchaseTaxBreak"></div>
     </div>
   </section>
 
@@ -1717,6 +1758,26 @@ function getMonthData() {
 
 function yen(n) { return '¥' + (n || 0).toLocaleString('ja-JP'); }
 function formatJP(n) { return (n || 0).toLocaleString('ja-JP'); }
+
+// ============== 消費税の内訳（税込入力を前提に逆算・税率10%） ==============
+const TAX_RATE = 0.10;
+function taxParts(taxIncluded) {
+  const included = Math.round(taxIncluded || 0);
+  // 税抜＝税込×10÷11（整数比で計算。1.1の割り算は浮動小数点で1円ズレるため）
+  const excluded = Math.floor(included * 10 / 11); // 税抜（切り捨て）
+  const tax = included - excluded;                 // 消費税
+  return { included, excluded, tax };
+}
+function renderTaxBreak(elId, taxIncluded) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const p = taxParts(taxIncluded);
+  el.innerHTML = `
+    <div class="tax-row tax-main"><span class="tax-lbl">税込</span><span class="tax-val">${yen(p.included)}</span></div>
+    <div class="tax-row"><span class="tax-lbl">税抜</span><span class="tax-val">${yen(p.excluded)}</span></div>
+    <div class="tax-row tax-vat"><span class="tax-lbl">消費税10%</span><span class="tax-val">${yen(p.tax)}</span></div>
+  `;
+}
 
 // ============== Tab Switch ==============
 function switchView(name) {
@@ -2241,6 +2302,7 @@ function renderAnnual() {
   }).join('');
   document.getElementById('annualTable').innerHTML = rows;
   document.getElementById('annualTotal').textContent = yen(total);
+  renderTaxBreak('annualTaxBreak', total);
 }
 
 function getFixedAmountForMonth(fixedItem, ym) {
@@ -2345,6 +2407,7 @@ function renderAnnualPurchase() {
   }).join('');
   document.getElementById('annualPurchaseTable').innerHTML = rows;
   document.getElementById('annualPurchaseTotal').textContent = yen(total);
+  renderTaxBreak('annualPurchaseTaxBreak', total);
 }
 
 function renderDashboard() {
@@ -2476,7 +2539,9 @@ function renderSales() {
   renderSalesTotal();
 }
 function renderSalesTotal() {
-  document.getElementById('salesTotal').textContent = yen(Object.values(getMonthData().sales || {}).reduce((a, b) => a + b, 0));
+  const total = Object.values(getMonthData().sales || {}).reduce((a, b) => a + b, 0);
+  document.getElementById('salesTotal').textContent = yen(total);
+  renderTaxBreak('salesTaxBreak', total);
 }
 
 function renderPurchase() {
@@ -2499,7 +2564,9 @@ function renderPurchase() {
   renderPurchaseTotal();
 }
 function renderPurchaseTotal() {
-  document.getElementById('purchaseTotal').textContent = yen(Object.values(getMonthData().purchases || {}).reduce((a, b) => a + b, 0));
+  const total = Object.values(getMonthData().purchases || {}).reduce((a, b) => a + b, 0);
+  document.getElementById('purchaseTotal').textContent = yen(total);
+  renderTaxBreak('purchaseTaxBreak', total);
 }
 
 function renderSalary() {
