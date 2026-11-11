@@ -910,7 +910,7 @@
     body.print-report .card:last-child { page-break-after: auto; }
     body.print-report .rep-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
     body.print-report .rep-block { page-break-inside: avoid; box-shadow: none; }
-    body.print-report .dash-grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    body.print-report .dash-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
     body.print-report .stat { padding: 10px; box-shadow: none; }
     body.print-report .stat-value { font-size: 18px; }
     body.print-report .subtab, body.print-report .ym-picker button, body.print-report .rep-print-note { display: none !important; }
@@ -1559,7 +1559,6 @@
       <div class="dash-grid" style="margin-bottom:14px;">
         <div class="stat income"><div class="stat-label">売上</div><div class="stat-value num" id="repMSales">¥0</div></div>
         <div class="stat expense"><div class="stat-label">支出</div><div class="stat-value num" id="repMExpense">¥0</div></div>
-        <div class="stat"><div class="stat-label">利益</div><div class="stat-value num" id="repMProfit">¥0</div><div class="stat-sub" id="repMProfitSub"></div></div>
       </div>
       <div class="rep-grid">
         <div class="rep-block"><h4>💖 売上の取引先別シェア</h4><div class="rep-pie"><canvas id="repMSalesPie" width="150" height="150"></canvas><div class="share-legend" id="repMSalesPieLegend"></div></div></div>
@@ -1588,7 +1587,6 @@
       <div class="dash-grid" style="margin-bottom:14px;">
         <div class="stat income"><div class="stat-label">年間売上</div><div class="stat-value num" id="repYSales">¥0</div></div>
         <div class="stat expense"><div class="stat-label">年間支出</div><div class="stat-value num" id="repYExpense">¥0</div></div>
-        <div class="stat"><div class="stat-label">年間利益</div><div class="stat-value num" id="repYProfit">¥0</div><div class="stat-sub" id="repYProfitSub"></div></div>
       </div>
       <div class="rep-grid">
         <div class="rep-block"><h4>💖 売上の取引先別シェア</h4><div class="rep-pie"><canvas id="repYSalesPie" width="150" height="150"></canvas><div class="share-legend" id="repYSalesPieLegend"></div></div></div>
@@ -4125,13 +4123,7 @@ function expenseEntries(months) {
 // 「次どうする？」のヒント文を作る
 function buildHint(sales, expense, salesEntries, expEntries, periodLabel) {
   const lines = [];
-  const profit = sales - expense;
   if (sales === 0 && expense === 0) return `${periodLabel}はまだ入力がありません。`;
-  const margin = sales > 0 ? (profit / sales * 100) : 0;
-  if (sales > 0) {
-    lines.push(`利益率は <b>${margin.toFixed(1)}%</b>（売上${yen(sales)}に対して利益${profit >= 0 ? '' : '−'}${yen(Math.abs(profit))}）。` +
-      (margin >= 15 ? '余裕のある水準です。' : margin >= 5 ? 'もう少し余裕がほしい水準です。' : margin >= 0 ? 'ギリギリ。支出を見直すか単価交渉を。' : '赤字です。原因を下の内訳で確認を。'));
-  }
   if (salesEntries.length > 0) {
     const top = salesEntries[0];
     const topPct = top.amount / sales * 100;
@@ -4151,9 +4143,6 @@ function renderReport() {
   document.getElementById('repMonthLabel').textContent = ymLabelLong(currentYM) + 'のレポート';
   document.getElementById('repMSales').textContent = yen(t.sales);
   document.getElementById('repMExpense').textContent = yen(t.expense);
-  const mp = t.sales - t.expense;
-  document.getElementById('repMProfit').textContent = (mp < 0 ? '−' : '') + yen(Math.abs(mp));
-  document.getElementById('repMProfitSub').textContent = t.sales > 0 ? `利益率 ${(mp / t.sales * 100).toFixed(1)}%` : '';
   const mS = collectPartnerTotals([currentYM], 'sales');
   const mP = collectPartnerTotals([currentYM], 'purchases');
   const mE = expenseEntries([currentYM]);
@@ -4171,9 +4160,6 @@ function renderReport() {
   const monthTotals = months.map(ym => { const tt = calcMonthTotals(ym); yS += tt.sales; yE += tt.expense; return { ym, sales: tt.sales }; });
   document.getElementById('repYSales').textContent = yen(yS);
   document.getElementById('repYExpense').textContent = yen(yE);
-  const yp = yS - yE;
-  document.getElementById('repYProfit').textContent = (yp < 0 ? '−' : '') + yen(Math.abs(yp));
-  document.getElementById('repYProfitSub').textContent = yS > 0 ? `利益率 ${(yp / yS * 100).toFixed(1)}%` : '';
   const ySE = collectPartnerTotals(months, 'sales');
   const yPE = collectPartnerTotals(months, 'purchases');
   const yEE = expenseEntries(months);
