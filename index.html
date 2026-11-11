@@ -795,126 +795,6 @@
     .tax-row { padding: 8px 3px; }
   }
 
-  /* ===== 金額入力（カンマ付きテキスト欄） ===== */
-  input.amt { font-family: 'DM Mono', monospace; text-align: right; font-variant-numeric: tabular-nums; }
-
-  /* ===== 各行の税抜表示 ===== */
-  .entry-amount-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
-  .entry-tax-sub {
-    font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-soft);
-    font-variant-numeric: tabular-nums; white-space: nowrap; min-height: 13px;
-  }
-  .entry-tax-sub .lbl { font-family: 'Zen Maru Gothic', sans-serif; font-size: 10px; margin-right: 3px; }
-
-  /* ===== あかさたなジャンプバー（入力欄の上に固定） ===== */
-  .gojuon-bar {
-    position: sticky; top: var(--sticky-top, 140px); z-index: 98;
-    display: flex; gap: 4px; padding: 8px 16px; margin: 0 -22px 12px;
-    background-color: rgba(253, 242, 236, 0.94); backdrop-filter: blur(8px);
-    border-bottom: 2px dashed var(--pink); overflow-x: auto; scrollbar-width: none;
-  }
-  .gojuon-bar::-webkit-scrollbar { display: none; }
-  .gojuon-bar button {
-    flex: 1 1 0; min-width: 26px; padding: 5px 1px;
-    font-size: 12px; font-weight: 700; font-family: 'Zen Maru Gothic', sans-serif;
-    color: var(--ink); background: white; border: 1.5px solid var(--ink); border-radius: 8px;
-    cursor: pointer; box-shadow: 1.5px 1.5px 0 var(--ink);
-  }
-  .gojuon-bar button:active { transform: translate(1px, 1px); box-shadow: none; }
-  .gojuon-bar button:disabled {
-    color: var(--ink-light); background: var(--peach-soft); border-color: var(--line-strong);
-    box-shadow: none; cursor: default; opacity: .55;
-  }
-  .gojuon-header { scroll-margin-top: calc(var(--sticky-top, 140px) + 52px); }
-
-  /* ===== 円グラフ（年間シェア） ===== */
-  .share-wrap {
-    display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
-    margin-top: 14px; padding: 16px; background: var(--cream);
-    border: 2px solid var(--ink); border-radius: 16px; box-shadow: 3px 3px 0 var(--ink);
-  }
-  .share-wrap canvas { width: 180px; height: 180px; flex-shrink: 0; }
-  .share-legend { flex: 1; min-width: 180px; font-size: 13px; }
-  .share-row {
-    display: flex; align-items: center; gap: 8px; padding: 5px 0;
-    border-bottom: 1px dashed var(--line-strong);
-  }
-  .share-row:last-child { border-bottom: none; }
-  .share-sw { width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--ink); flex-shrink: 0; }
-  .share-name { flex: 1; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .share-pct { font-family: 'DM Mono', monospace; font-weight: 700; font-size: 15px; min-width: 52px; text-align: right; }
-  .share-amt { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-soft); min-width: 84px; text-align: right; }
-  .share-title { font-family: 'Fraunces', serif; font-style: italic; font-weight: 700; font-size: 15px; margin: 18px 0 0; }
-  @media (max-width: 480px) { .share-amt { display: none; } }
-
-  /* ===== レポート ===== */
-  .rep-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
-  .rep-block {
-    background: var(--cream); border: 2px solid var(--ink); border-radius: 16px;
-    padding: 14px; box-shadow: 3px 3px 0 var(--ink);
-  }
-  .rep-block h4 {
-    margin: 0 0 8px; font-family: 'Fraunces', serif; font-style: italic; font-weight: 700;
-    font-size: 15px; display: flex; align-items: center; gap: 6px;
-  }
-  .rep-pie { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  .rep-pie canvas { width: 150px; height: 150px; flex-shrink: 0; }
-  .rep-pie .share-legend { min-width: 150px; }
-  .rep-pie .share-name { white-space: normal; line-height: 1.3; }
-  .rep-hint {
-    margin-top: 14px; padding: 12px 14px; background: white;
-    border: 2px dashed var(--line-strong); border-radius: 12px; font-size: 13px; line-height: 1.7;
-  }
-  .rep-hint b { color: var(--blue); }
-  .rep-month-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px dashed var(--line-strong); font-size: 13px; }
-  .rep-month-row:last-child { border-bottom: none; }
-  .rep-month-row .mo { width: 64px; font-weight: 700; }
-  .rep-month-row .bar-wrap { flex: 1; height: 12px; background: white; border: 1.5px solid var(--ink); border-radius: 6px; overflow: hidden; }
-  .rep-month-row .bar { height: 100%; background: var(--blue); }
-  .rep-month-row .pct { font-family: 'DM Mono', monospace; font-weight: 700; width: 50px; text-align: right; }
-  .rep-month-row .amt { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-soft); width: 90px; text-align: right; }
-  @media (max-width: 480px) { .rep-month-row .amt { display: none; } }
-
-  /* ===== 一覧（印刷用）ページ ===== */
-  .list-controls { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-bottom: 14px; }
-  .list-controls label { font-size: 13px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
-  .list-controls input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--blue-bright); }
-  .list-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 6px 0 4px; }
-  .list-table th, .list-table td {
-    padding: 7px 8px; border-bottom: 1px dashed var(--line-strong); text-align: right;
-    font-family: 'DM Mono', monospace; font-variant-numeric: tabular-nums; white-space: nowrap;
-  }
-  .list-table th { font-family: 'Zen Maru Gothic', sans-serif; font-size: 12px; color: var(--ink-soft); border-bottom: 2px solid var(--ink); }
-  .list-table th:first-child, .list-table td:first-child { text-align: left; font-family: 'Zen Maru Gothic', sans-serif; white-space: normal; }
-  .list-table tfoot td { font-weight: 700; border-top: 2px solid var(--ink); border-bottom: none; background: var(--pink-soft); }
-  .list-section-title {
-    font-family: 'Fraunces', serif; font-weight: 700; font-style: italic; font-size: 16px;
-    margin: 18px 0 4px; color: var(--ink); display: flex; align-items: center; gap: 8px;
-  }
-  .list-section-title .cnt { font-family: 'Zen Maru Gothic', sans-serif; font-style: normal; font-size: 12px; color: var(--ink-soft); font-weight: 500; }
-  .list-print-head { display: none; }
-  @media (max-width: 480px) { .list-table { font-size: 11px; } .list-table th, .list-table td { padding: 6px 4px; } }
-
-  /* ===== 印刷（一覧ページ） ===== */
-  @media print {
-    @page { size: A4 portrait; margin: 14mm 12mm; }
-    body { background: white !important; color: #000; }
-    header, nav.tabs, .no-print, .gojuon-bar, .list-controls, .modal-bg { display: none !important; }
-    main { padding: 0 !important; max-width: none !important; }
-    .view { display: none !important; }
-    .view#view-list { display: block !important; }
-    .card { border: none !important; box-shadow: none !important; padding: 0 !important; background: white !important; }
-    .list-print-head { display: block; margin-bottom: 10px; }
-    .list-print-head h1 { font-size: 18px; margin: 0 0 2px; }
-    .list-print-head .meta { font-size: 11px; color: #555; }
-    .list-table { font-size: 11.5px; }
-    .list-table tr { page-break-inside: avoid; }
-    .list-table th, .list-table td { border-bottom: 1px solid #bbb; padding: 4px 6px; }
-    .list-table th { border-bottom: 1.5px solid #000; color: #000; }
-    .list-table tfoot td { background: #f0f0f0 !important; border-top: 1.5px solid #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .list-section-title { page-break-after: avoid; color: #000; }
-  }
-
   .empty {
     text-align: center;
     padding: 36px 20px;
@@ -1353,8 +1233,6 @@
   <button class="tab" data-view="annual">📅 年間売上</button>
   <button class="tab" data-view="purchase">🌸 買掛</button>
   <button class="tab" data-view="annual-purchase">📋 年間買掛</button>
-  <button class="tab" data-view="list">🖨 一覧</button>
-  <button class="tab" data-view="report">📊 レポート</button>
   <button class="tab" data-view="salary">🎀 給与</button>
   <button class="tab" data-view="loan">🍊 融資</button>
   <button class="tab" data-view="fixed">🫧 固定費</button>
@@ -1457,8 +1335,6 @@
   <section class="view" id="view-sales">
     <div class="card">
       <h2 id="salesMonthLabel">今月の売上</h2>
-      <div class="gojuon-bar" id="salesGojuonBar"></div>
-      <p style="font-size:12px;color:var(--ink-soft);margin:0 0 4px;">✿ 金額は<strong>税込</strong>で入力。下に税抜（10%・切り捨て）を自動表示します</p>
       <div id="salesList" class="entry-list"></div>
       <div class="total-row"><div class="name">Total ♡</div><div class="val" id="salesTotal">¥0</div></div>
       <div class="tax-breakdown" id="salesTaxBreak"></div>
@@ -1481,11 +1357,6 @@
       <div id="annualTable" class="entry-list"></div>
       <div class="total-row"><div class="name">年間合計 ♡</div><div class="val" id="annualTotal">¥0</div></div>
       <div class="tax-breakdown" id="annualTaxBreak"></div>
-      <div class="share-title">🥧 取引先別の割合（年間）</div>
-      <div class="share-wrap">
-        <canvas id="annualPie" width="180" height="180"></canvas>
-        <div class="share-legend" id="annualPieLegend"></div>
-      </div>
     </div>
   </section>
 
@@ -1493,8 +1364,6 @@
   <section class="view" id="view-purchase">
     <div class="card">
       <h2 id="purchaseMonthLabel">今月の買掛・支払</h2>
-      <div class="gojuon-bar" id="purchaseGojuonBar"></div>
-      <p style="font-size:12px;color:var(--ink-soft);margin:0 0 4px;">✿ 金額は<strong>税込</strong>で入力。下に税抜（10%・切り捨て）を自動表示します</p>
       <div id="purchaseList" class="entry-list"></div>
       <div class="total-row"><div class="name">Total ♡</div><div class="val" id="purchaseTotal">¥0</div></div>
       <div class="tax-breakdown" id="purchaseTaxBreak"></div>
@@ -1517,80 +1386,10 @@
       <div id="annualPurchaseTable" class="entry-list"></div>
       <div class="total-row"><div class="name">年間合計 ♡</div><div class="val" id="annualPurchaseTotal">¥0</div></div>
       <div class="tax-breakdown" id="annualPurchaseTaxBreak"></div>
-      <div class="share-title">🥧 取引先別の割合（年間）</div>
-      <div class="share-wrap">
-        <canvas id="annualPurchasePie" width="180" height="180"></canvas>
-        <div class="share-legend" id="annualPurchasePieLegend"></div>
-      </div>
     </div>
   </section>
 
   <!-- Salary -->
-  <!-- レポート -->
-  <section class="view" id="view-report">
-    <div class="card">
-      <h2 id="repMonthLabel">今月のレポート</h2>
-      <p style="font-size:12px;color:var(--ink-soft);margin:0 0 12px;">✿ 月は上の「‹ ›」で切り替え。どの取引先に偏ってるか、お金がどこに出ていってるかが見えます</p>
-      <div class="dash-grid" style="margin-bottom:14px;">
-        <div class="stat income"><div class="stat-label">売上</div><div class="stat-value num" id="repMSales">¥0</div></div>
-        <div class="stat expense"><div class="stat-label">支出</div><div class="stat-value num" id="repMExpense">¥0</div></div>
-        <div class="stat"><div class="stat-label">利益</div><div class="stat-value num" id="repMProfit">¥0</div><div class="stat-sub" id="repMProfitSub"></div></div>
-      </div>
-      <div class="rep-grid">
-        <div class="rep-block"><h4>💖 売上の取引先別シェア</h4><div class="rep-pie"><canvas id="repMSalesPie" width="150" height="150"></canvas><div class="share-legend" id="repMSalesPieLegend"></div></div></div>
-        <div class="rep-block"><h4>🌸 買掛の取引先別シェア</h4><div class="rep-pie"><canvas id="repMPurchasePie" width="150" height="150"></canvas><div class="share-legend" id="repMPurchasePieLegend"></div></div></div>
-        <div class="rep-block"><h4>💸 支出の内訳</h4><div class="rep-pie"><canvas id="repMExpensePie" width="150" height="150"></canvas><div class="share-legend" id="repMExpensePieLegend"></div></div></div>
-      </div>
-      <div class="rep-hint" id="repMHint"></div>
-    </div>
-
-    <div class="card">
-      <h2>年間のレポート</h2>
-      <div class="input-row" style="gap: 8px; margin-bottom: 4px;">
-        <button class="subtab active" id="repTabFiscal" onclick="setReportMode('fiscal')" style="flex:1; text-align:center;">🏢 事業年度（9月〜8月）</button>
-        <button class="subtab" id="repTabCalendar" onclick="setReportMode('calendar')" style="flex:1; text-align:center;">📆 暦年（1月〜12月）</button>
-      </div>
-      <div class="ym-picker" style="margin: 10px 0; justify-content: center; display: inline-flex;">
-        <button onclick="changeReportYear(-1)">‹</button>
-        <div class="ym-display" id="repYearLabel">-</div>
-        <button onclick="changeReportYear(1)">›</button>
-      </div>
-      <div class="dash-grid" style="margin-bottom:14px;">
-        <div class="stat income"><div class="stat-label">年間売上</div><div class="stat-value num" id="repYSales">¥0</div></div>
-        <div class="stat expense"><div class="stat-label">年間支出</div><div class="stat-value num" id="repYExpense">¥0</div></div>
-        <div class="stat"><div class="stat-label">年間利益</div><div class="stat-value num" id="repYProfit">¥0</div><div class="stat-sub" id="repYProfitSub"></div></div>
-      </div>
-      <div class="rep-grid">
-        <div class="rep-block"><h4>💖 売上の取引先別シェア</h4><div class="rep-pie"><canvas id="repYSalesPie" width="150" height="150"></canvas><div class="share-legend" id="repYSalesPieLegend"></div></div></div>
-        <div class="rep-block"><h4>🌸 買掛の取引先別シェア</h4><div class="rep-pie"><canvas id="repYPurchasePie" width="150" height="150"></canvas><div class="share-legend" id="repYPurchasePieLegend"></div></div></div>
-        <div class="rep-block"><h4>💸 支出の内訳</h4><div class="rep-pie"><canvas id="repYExpensePie" width="150" height="150"></canvas><div class="share-legend" id="repYExpensePieLegend"></div></div></div>
-        <div class="rep-block" style="grid-column: 1 / -1;"><h4>📅 月ごとの売上（年間に占める割合）</h4><div id="repMonthBars"></div></div>
-      </div>
-      <div class="rep-hint" id="repYHint"></div>
-    </div>
-  </section>
-
-  <!-- 一覧（印刷用） -->
-  <section class="view" id="view-list">
-    <div class="card">
-      <div class="list-print-head">
-        <h1 id="listPrintTitle"></h1>
-        <div class="meta" id="listPrintMeta"></div>
-      </div>
-      <h2 id="listMonthLabel" class="no-print">一覧</h2>
-      <div class="list-controls">
-        <label><input type="checkbox" id="listShowSales" checked onchange="renderListView()">売上</label>
-        <label><input type="checkbox" id="listShowPurchase" checked onchange="renderListView()">買掛</label>
-        <label><input type="checkbox" id="listShowSalary" onchange="renderListView()">給与</label>
-        <label><input type="checkbox" id="listShowFixed" onchange="renderListView()">固定費</label>
-        <label><input type="checkbox" id="listShowTax" checked onchange="renderListView()">税抜・消費税も表示</label>
-        <button class="btn btn-sm" onclick="printListView()" style="margin-left:auto;">🖨 印刷</button>
-      </div>
-      <p class="no-print" style="font-size:12px;color:var(--ink-light);margin:0 0 6px;">金額が入力されている項目だけを表示します。月は上の「‹ ›」で切り替えられます。</p>
-      <div id="listBody"></div>
-    </div>
-  </section>
-
   <section class="view" id="view-salary">
     <div class="card">
       <h2 id="salaryMonthLabel">今月の給与</h2>
@@ -1665,8 +1464,8 @@
       <p style="font-size: 12px; color: var(--ink-soft); margin: 0 0 10px;">追加後、一覧または融資タブから支払履歴や金利を記録できます</p>
       <div class="input-row" style="flex-wrap: wrap;">
         <input type="text" id="newLoanName" placeholder="借入先名（例：日本政策金融公庫）" style="flex: 1 1 100%;">
-        <input type="text" class="amt" id="newLoanBalance" placeholder="借りた金額（円）" inputmode="numeric">
-        <input type="text" class="amt" id="newLoanPayment" placeholder="毎月返済額（円）" inputmode="numeric">
+        <input type="number" id="newLoanBalance" placeholder="借りた金額（円）" inputmode="numeric">
+        <input type="number" id="newLoanPayment" placeholder="毎月返済額（円）" inputmode="numeric">
         <button class="btn" onclick="addLoan()">追加 +</button>
       </div>
       <button class="btn btn-soft" style="width:100%; margin-top:6px;" onclick="openListModal('loans')" id="loanCountBtn">📋 一覧・編集を見る</button>
@@ -1676,7 +1475,7 @@
       <h3>固定費 / Fixed Costs</h3>
       <div class="input-row">
         <input type="text" id="newFixedName" placeholder="名称（例：家賃）" style="flex: 2;">
-        <input type="text" class="amt" id="newFixedAmount" placeholder="金額" inputmode="numeric" style="flex: 1;">
+        <input type="number" id="newFixedAmount" placeholder="金額" inputmode="numeric" style="flex: 1;">
         <button class="btn" onclick="addFixed()">追加 +</button>
       </div>
       <button class="btn btn-soft" style="width:100%; margin-top:6px;" onclick="openListModal('fixed')" id="fixedCountBtn">📋 一覧・編集を見る</button>
@@ -1960,31 +1759,6 @@ function getMonthData() {
 function yen(n) { return '¥' + (n || 0).toLocaleString('ja-JP'); }
 function formatJP(n) { return (n || 0).toLocaleString('ja-JP'); }
 
-// ============== 金額入力（カンマ区切り） ==============
-// 「1,100,000」のような文字列 → 数値
-function parseAmt(v) {
-  if (v === null || v === undefined) return 0;
-  let t = String(v).replace(/[０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
-  t = t.replace(/[^0-9.\-]/g, '');
-  return parseFloat(t) || 0;
-}
-// 数値 → 入力欄用のカンマ付き文字列（0や空は空欄）
-function fmtAmt(n) {
-  const v = parseAmt(n);
-  return v ? v.toLocaleString('ja-JP') : '';
-}
-// 入力中にカンマを自動で入れる（class="amt" の欄すべて）
-document.addEventListener('input', e => {
-  const el = e.target;
-  if (!(el instanceof HTMLInputElement) || !el.classList.contains('amt')) return;
-  const raw = el.value;
-  const neg = raw.trim().startsWith('-');
-  let digits = raw.replace(/[０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0)).replace(/[^0-9]/g, '');
-  if (digits === '') { el.value = neg ? '-' : ''; return; }
-  const formatted = (neg ? '-' : '') + Number(digits).toLocaleString('ja-JP');
-  if (formatted !== raw) el.value = formatted;
-});
-
 // ============== 消費税の内訳（税込入力を前提に逆算・税率10%） ==============
 const TAX_RATE = 0.10;
 function taxParts(taxIncluded) {
@@ -1993,18 +1767,6 @@ function taxParts(taxIncluded) {
   const excluded = Math.floor(included * 10 / 11); // 税抜（切り捨て）
   const tax = included - excluded;                 // 消費税
   return { included, excluded, tax };
-}
-// 各行の下に出す「税抜 ¥xxx」の小さな表示（0円なら空）
-function taxSubHtml(amount) {
-  const n = Math.round(amount || 0);
-  if (!n) return '';
-  return `<span class="lbl">税抜</span>${yen(taxParts(n).excluded)}`;
-}
-function refreshTaxSub(category, id) {
-  const el = document.getElementById(`taxsub-${category}-${id}`);
-  if (!el) return;
-  const m = getMonthData();
-  el.innerHTML = taxSubHtml((m[category] || {})[id]);
 }
 function renderTaxBreak(elId, taxIncluded) {
   const el = document.getElementById(elId);
@@ -2072,8 +1834,8 @@ function removeMaster(type, id) {
 
 function addLoan() {
   const name = document.getElementById('newLoanName').value.trim();
-  const borrowed = parseAmt(document.getElementById('newLoanBalance').value); // 借りた金額
-  const payment = parseAmt(document.getElementById('newLoanPayment').value);
+  const borrowed = parseFloat(document.getElementById('newLoanBalance').value) || 0; // 借りた金額
+  const payment = parseFloat(document.getElementById('newLoanPayment').value) || 0;
   if (!name) return;
   data.loans.push({
     id: uid(), name,
@@ -2102,7 +1864,7 @@ function removeLoan(id) {
 function updateLoanBalance(id, val) {
   const loan = data.loans.find(l => l.id === id);
   if (loan) {
-    loan.currentBalance = parseAmt(val);
+    loan.currentBalance = parseFloat(val) || 0;
     saveData();
     renderDashboard();
     renderLoanCardList();
@@ -2111,7 +1873,7 @@ function updateLoanBalance(id, val) {
 function updateLoanInitial(id, val) {
   const loan = data.loans.find(l => l.id === id);
   if (loan) {
-    loan.initialAmount = parseAmt(val);
+    loan.initialAmount = parseFloat(val) || 0;
     saveData();
     renderDashboard();
     renderLoanCardList();
@@ -2120,7 +1882,7 @@ function updateLoanInitial(id, val) {
 
 function addFixed() {
   const name = document.getElementById('newFixedName').value.trim();
-  const amount = parseAmt(document.getElementById('newFixedAmount').value);
+  const amount = parseFloat(document.getElementById('newFixedAmount').value) || 0;
   if (!name) return;
   data.fixed.push({ id: uid(), name, amount, memo: '', drawing: '' });
   document.getElementById('newFixedName').value = '';
@@ -2140,7 +1902,7 @@ function updateFixedAmount(id, val) {
   // その月だけの金額を上書き保存（デフォルト額は変えない）
   const m = getMonthData();
   m.fixedOverrides ||= {};
-  const amount = parseAmt(val);
+  const amount = parseFloat(val) || 0;
   const fixedItem = data.fixed.find(x => x.id === id);
   const defaultAmount = fixedItem ? (fixedItem.amount || 0) : 0;
   if (amount === defaultAmount) {
@@ -2164,14 +1926,13 @@ function resetFixedToDefault(id) {
 // ============== Monthly Entry ==============
 function updateEntry(category, id, val) {
   const m = getMonthData();
-  const amount = parseAmt(val);
+  const amount = parseFloat(val) || 0;
   if (amount === 0) {
     delete m[category][id];
   } else {
     m[category][id] = amount;
   }
   saveData();
-  refreshTaxSub(category, id);
   if (category === 'sales') renderSalesTotal();
   if (category === 'purchases') renderPurchaseTotal();
   if (category === 'salaries') renderSalaryTotal();
@@ -2192,8 +1953,6 @@ function renderAll() {
   renderFixedView();
   renderMonthlyMemo();
   renderMaster();
-  renderListView();
-  renderReport();
 }
 
 // ============== ホームウィジェット（今日の予定・タスク・メモ・誕生日）==============
@@ -2525,7 +2284,7 @@ function renderAnnual() {
         detailHtml = '<div style="padding: 4px 8px 10px;">' + entries.map(e => `
           <div style="display:flex; justify-content:space-between; padding: 8px 12px; border-bottom: 1px dashed var(--line-strong); font-size: 14px;">
             <span>${escapeHtml(e.name)}</span>
-            <span style="text-align:right;"><span class="num" style="font-weight:600;">${yen(e.amount)}</span><br><span style="font-size:11px;color:var(--ink-soft);">税抜 ${yen(taxParts(e.amount).excluded)}</span></span>
+            <span class="num" style="font-weight:600;">${yen(e.amount)}</span>
           </div>
         `).join('') + '</div>';
       }
@@ -2544,7 +2303,6 @@ function renderAnnual() {
   document.getElementById('annualTable').innerHTML = rows;
   document.getElementById('annualTotal').textContent = yen(total);
   renderTaxBreak('annualTaxBreak', total);
-  renderSharePie('annualPie', 'annualPieLegend', collectPartnerTotals(months, 'sales'), '売上');
 }
 
 function getFixedAmountForMonth(fixedItem, ym) {
@@ -2631,7 +2389,7 @@ function renderAnnualPurchase() {
         detailHtml = '<div style="padding: 4px 8px 10px;">' + entries.map(e => `
           <div style="display:flex; justify-content:space-between; padding: 8px 12px; border-bottom: 1px dashed var(--line-strong); font-size: 14px;">
             <span>${escapeHtml(e.name)}</span>
-            <span style="text-align:right;"><span class="num" style="font-weight:600;">${yen(e.amount)}</span><br><span style="font-size:11px;color:var(--ink-soft);">税抜 ${yen(taxParts(e.amount).excluded)}</span></span>
+            <span class="num" style="font-weight:600;">${yen(e.amount)}</span>
           </div>
         `).join('') + '</div>';
       }
@@ -2650,7 +2408,6 @@ function renderAnnualPurchase() {
   document.getElementById('annualPurchaseTable').innerHTML = rows;
   document.getElementById('annualPurchaseTotal').textContent = yen(total);
   renderTaxBreak('annualPurchaseTaxBreak', total);
-  renderSharePie('annualPurchasePie', 'annualPurchasePieLegend', collectPartnerTotals(months, 'purchases'), '買掛');
 }
 
 function renderDashboard() {
@@ -2773,16 +2530,12 @@ function renderSales() {
     list.innerHTML = withGojuonHeaders(salesPartners, p => p.kana || p.name, c => `
       <div class="entry-item">
         <div class="entry-name entry-name-link" onclick="openPartnerLedger('${c.id}')">${escapeHtml(c.name)} <span style="font-size:11px;color:var(--blue-bright);">▸</span></div>
-        <div class="entry-amount-wrap">
-          <input type="text" inputmode="numeric" class="entry-amount amt"
-                 value="${fmtAmt(m.sales[c.id])}" placeholder="0"
-                 onchange="updateEntry('sales', '${c.id}', this.value)">
-          <div class="entry-tax-sub" id="taxsub-sales-${c.id}">${taxSubHtml(m.sales[c.id])}</div>
-        </div>
+        <input type="number" inputmode="numeric" class="entry-amount"
+               value="${m.sales[c.id] || ''}" placeholder="0"
+               onchange="updateEntry('sales', '${c.id}', this.value)">
       </div>
     `);
   }
-  renderGojuonBar('salesGojuonBar', 'salesList');
   renderSalesTotal();
 }
 function renderSalesTotal() {
@@ -2802,16 +2555,12 @@ function renderPurchase() {
     list.innerHTML = withGojuonHeaders(purchasePartners, p => p.kana || p.name, s => `
       <div class="entry-item">
         <div class="entry-name entry-name-link" onclick="openPartnerLedger('${s.id}')">${escapeHtml(s.name)} <span style="font-size:11px;color:var(--blue-bright);">▸</span></div>
-        <div class="entry-amount-wrap">
-          <input type="text" inputmode="numeric" class="entry-amount amt"
-                 value="${fmtAmt(m.purchases[s.id])}" placeholder="0"
-                 onchange="updateEntry('purchases', '${s.id}', this.value)">
-          <div class="entry-tax-sub" id="taxsub-purchases-${s.id}">${taxSubHtml(m.purchases[s.id])}</div>
-        </div>
+        <input type="number" inputmode="numeric" class="entry-amount"
+               value="${m.purchases[s.id] || ''}" placeholder="0"
+               onchange="updateEntry('purchases', '${s.id}', this.value)">
       </div>
     `);
   }
-  renderGojuonBar('purchaseGojuonBar', 'purchaseList');
   renderPurchaseTotal();
 }
 function renderPurchaseTotal() {
@@ -2831,8 +2580,8 @@ function renderSalary() {
       <div class="entry-item">
         <div class="entry-name">${escapeHtml(e.name)}</div>
         <button class="btn-detail btn-sm" onclick="openEmployeeDetail('${e.id}')">👤</button>
-        <input type="text" inputmode="numeric" class="entry-amount amt"
-               value="${fmtAmt(m.salaries[e.id])}" placeholder="0"
+        <input type="number" inputmode="numeric" class="entry-amount"
+               value="${m.salaries[e.id] || ''}" placeholder="0"
                onchange="updateEntry('salaries', '${e.id}', this.value)">
       </div>
     `).join('');
@@ -2891,8 +2640,8 @@ function renderLoanCardList() {
         <div class="loan-body">
           <div>
             <label>借りた金額 / 当初借入額</label>
-            <input type="text" class="amt" inputmode="numeric"
-                   value="${fmtAmt(initial)}"
+            <input type="number" inputmode="numeric"
+                   value="${initial}"
                    onchange="updateLoanInitial('${l.id}', this.value)"
                    style="width: 180px; padding: 10px 12px; font-size: 17px; font-weight: 700;">
           </div>
@@ -2910,8 +2659,8 @@ function renderLoanCardList() {
 
         <div class="loan-current-balance">
           <span style="font-size: 12px; color: var(--ink-soft);">現在の残高</span>
-          <input type="text" class="amt" inputmode="numeric"
-                 value="${fmtAmt(l.currentBalance)}"
+          <input type="number" inputmode="numeric"
+                 value="${l.currentBalance}"
                  onchange="updateLoanBalance('${l.id}', this.value)"
                  style="width: 150px; padding: 7px 10px; font-size: 14px;">
           <span style="font-size: 11px; color: var(--ink-light);">支払い記録すると自動で減ります</span>
@@ -2955,13 +2704,10 @@ function renderFixedView() {
           ${isOverridden ? `<button onclick="resetFixedToDefault('${f.id}')" style="font-size: 10px; margin-left: 6px; background: var(--peach-soft); border: 1px solid var(--line-strong); border-radius: 6px; padding: 2px 6px; cursor: pointer; color: var(--ink-soft);">通常額(${yen(f.amount)})に戻す</button>` : ''}
         </div>
         <button class="btn-detail btn-sm" onclick="openFixedDetail('${f.id}')">詳細</button>
-        <div class="entry-amount-wrap">
-          <input type="text" inputmode="numeric" class="entry-amount amt"
-                 value="${fmtAmt(monthAmount)}" placeholder="0"
-                 style="${isOverridden ? 'border-color: var(--red); background: white;' : ''}"
-                 onchange="updateFixedAmount('${f.id}', this.value)">
-          <div class="entry-tax-sub">${taxSubHtml(monthAmount)}</div>
-        </div>
+        <input type="number" inputmode="numeric" class="entry-amount"
+               value="${monthAmount}"
+               style="${isOverridden ? 'border-color: var(--red); background: white;' : ''}"
+               onchange="updateFixedAmount('${f.id}', this.value)">
       </div>
     `;
     }).join('');
@@ -3677,10 +3423,10 @@ function openLoanDetail(id) {
         <div><label>借入元（金融機関名）</label><input type="text" id="loan_lender" value="${escapeHtml(loan.lender || '')}" placeholder="例：日本政策金融公庫"></div>
         <div><label>何のために借りた?（目的）</label><input type="text" id="loan_purpose" value="${escapeHtml(loan.purpose || '')}" placeholder="例：設備投資・運転資金"></div>
         <div><label>借入開始日（借りた日）</label><input type="date" id="loan_startDate" value="${loan.startDate || ''}"></div>
-        <div><label>当初借入額（借りた金額）</label><input type="text" class="amt" id="loan_initialAmount" value="${fmtAmt(loan.initialAmount)}" inputmode="numeric"></div>
-        <div><label>毎月返済額</label><input type="text" class="amt" id="loan_monthlyPayment" value="${fmtAmt(loan.monthlyPayment)}" inputmode="numeric"></div>
+        <div><label>当初借入額（借りた金額）</label><input type="number" id="loan_initialAmount" value="${loan.initialAmount || ''}" inputmode="numeric"></div>
+        <div><label>毎月返済額</label><input type="number" id="loan_monthlyPayment" value="${loan.monthlyPayment || ''}" inputmode="numeric"></div>
         <div><label>毎月の引き落とし日</label><input type="number" id="loan_paymentDay" value="${loan.paymentDay || ''}" inputmode="numeric" placeholder="例：27" min="1" max="31"></div>
-        <div><label>現在残高</label><input type="text" class="amt" id="loan_currentBalance" value="${fmtAmt(loan.currentBalance)}" inputmode="numeric"></div>
+        <div><label>現在残高</label><input type="number" id="loan_currentBalance" value="${loan.currentBalance || ''}" inputmode="numeric"></div>
         <div><label>完済予定日（手入力・任意）</label><input type="date" id="loan_payoffDate" value="${loan.payoffDate || ''}"></div>
       </div>
       <p style="font-size: 11px; color: var(--ink-light); margin: 8px 0 0;">💡 完済予定日を空欄にすると、残高÷毎月返済額から自動で計算されます</p>
@@ -3698,7 +3444,7 @@ function openLoanDetail(id) {
         </div>
         <div class="pay-form">
           <input type="month" id="payDate" value="${currentYM}">
-          <input type="text" class="amt" id="payAmount" placeholder="金額" inputmode="numeric" value="${fmtAmt(loan.monthlyPayment)}">
+          <input type="number" id="payAmount" placeholder="金額" inputmode="numeric" value="${loan.monthlyPayment || ''}">
           <input type="number" id="payRate" placeholder="2.5" step="0.01" inputmode="decimal">
           <input type="text" id="payNote" placeholder="メモ">
           <button class="btn btn-sm" onclick="addPayment('${id}')">+</button>
@@ -3769,7 +3515,7 @@ function addPayment(id) {
   const loan = data.loans.find(l => l.id === id);
   if (!loan) return;
   const date = document.getElementById('payDate').value;
-  const amount = parseAmt(document.getElementById('payAmount').value);
+  const amount = parseFloat(document.getElementById('payAmount').value) || 0;
   const rate = parseFloat(document.getElementById('payRate').value) || 0;
   const note = document.getElementById('payNote').value;
   if (!date || amount === 0) {
@@ -3779,7 +3525,7 @@ function addPayment(id) {
   loan.payments.push({ date, amount, rate, note });
   // 残高自動更新
   loan.currentBalance = Math.max(0, (loan.currentBalance || 0) - amount);
-  document.getElementById('loan_currentBalance').value = fmtAmt(loan.currentBalance);
+  document.getElementById('loan_currentBalance').value = loan.currentBalance;
   document.getElementById('payNote').value = '';
   document.getElementById('payRate').value = '';
   saveData();
@@ -3796,7 +3542,7 @@ function removePayment(id, idx) {
   if (removed) {
     loan.currentBalance = (loan.currentBalance || 0) + (removed.amount || 0);
     const balEl = document.getElementById('loan_currentBalance');
-    if (balEl) balEl.value = fmtAmt(loan.currentBalance);
+    if (balEl) balEl.value = loan.currentBalance;
   }
   saveData();
   renderPayHistory(id);
@@ -3809,10 +3555,10 @@ function saveLoanDetail(id) {
   loan.lender = document.getElementById('loan_lender').value;
   loan.purpose = document.getElementById('loan_purpose').value;
   loan.startDate = document.getElementById('loan_startDate').value;
-  loan.initialAmount = parseAmt(document.getElementById('loan_initialAmount').value);
-  loan.monthlyPayment = parseAmt(document.getElementById('loan_monthlyPayment').value);
+  loan.initialAmount = parseFloat(document.getElementById('loan_initialAmount').value) || 0;
+  loan.monthlyPayment = parseFloat(document.getElementById('loan_monthlyPayment').value) || 0;
   loan.paymentDay = document.getElementById('loan_paymentDay').value;
-  loan.currentBalance = parseAmt(document.getElementById('loan_currentBalance').value);
+  loan.currentBalance = parseFloat(document.getElementById('loan_currentBalance').value) || 0;
   loan.payoffDate = document.getElementById('loan_payoffDate').value;
   loan.memo = document.getElementById('loan_memo').value;
   saveData();
@@ -3833,7 +3579,7 @@ function openFixedDetail(id) {
       <div class="modal-section-title">基本情報</div>
       <div class="form-grid">
         <div><label>名称</label><input type="text" id="fix_name" value="${escapeHtml(fixed.name)}"></div>
-        <div><label>金額/月</label><input type="text" class="amt" id="fix_amount" value="${fmtAmt(fixed.amount)}" inputmode="numeric"></div>
+        <div><label>金額/月</label><input type="number" id="fix_amount" value="${fixed.amount}" inputmode="numeric"></div>
       </div>
     </div>
 
@@ -3868,7 +3614,7 @@ function saveFixedDetail(id) {
   const fixed = data.fixed.find(f => f.id === id);
   if (!fixed) return;
   fixed.name = document.getElementById('fix_name').value;
-  fixed.amount = parseAmt(document.getElementById('fix_amount').value);
+  fixed.amount = parseFloat(document.getElementById('fix_amount').value) || 0;
   fixed.memo = document.getElementById('fix_memo').value;
   saveData();
   closeDetailModal();
@@ -3960,272 +3706,6 @@ function withGojuonHeaders(items, keyFn, rowFn) {
     html += rowFn(item);
   });
   return html;
-}
-
-// ============== あかさたなジャンプバー ==============
-const GOJUON_BAR_ROWS = ['あ','か','さ','た','な','は','ま','や','ら','わ','A-Z','#'];
-function renderGojuonBar(barId, listId) {
-  const bar = document.getElementById(barId);
-  if (!bar) return;
-  const list = document.getElementById(listId);
-  const present = new Set();
-  list.querySelectorAll('.gojuon-header').forEach(h => {
-    const t = h.textContent.trim();
-    present.add(t === 'その他' ? '#' : (t === 'A-Z' ? 'A-Z' : t.replace('行', '')));
-  });
-  bar.innerHTML = GOJUON_BAR_ROWS.filter(r => (r !== 'A-Z' && r !== '#') || present.has(r)).map(r => {
-    const label = r === '#' ? '他' : r;
-    const on = present.has(r);
-    return `<button ${on ? '' : 'disabled'} onclick="jumpToGojuon('${listId}', '${r}')">${label}</button>`;
-  }).join('');
-}
-function jumpToGojuon(listId, row) {
-  const list = document.getElementById(listId);
-  const want = row === '#' ? 'その他' : (row === 'A-Z' ? 'A-Z' : row + '行');
-  const target = [...list.querySelectorAll('.gojuon-header')].find(h => h.textContent.trim() === want);
-  if (!target) return;
-  updateStickyTop();
-  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-function updateStickyTop() {
-  const h = document.querySelector('header');
-  const n = document.querySelector('nav.tabs');
-  const top = (h ? h.offsetHeight : 0) + (n ? n.offsetHeight : 0);
-  if (top > 0) document.documentElement.style.setProperty('--sticky-top', top + 'px');
-}
-window.addEventListener('resize', updateStickyTop);
-window.addEventListener('load', updateStickyTop);
-document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => setTimeout(updateStickyTop, 50)));
-
-// ============== 円グラフ（取引先別シェア） ==============
-const PIE_COLORS = ['#5a7df5', '#ffaf78', '#41bcf5', '#f0c8e6', '#f42d23', '#7ea86f', '#b5a4c7'];
-// 指定月（配列）の category（'sales' | 'purchases'）を取引先ごとに合計
-function collectPartnerTotals(months, category) {
-  const sums = {};
-  months.forEach(ym => {
-    const m = data.monthly[ym];
-    if (!m || !m[category]) return;
-    Object.entries(m[category]).forEach(([pid, v]) => { sums[pid] = (sums[pid] || 0) + (v || 0); });
-  });
-  return data.partners
-    .map(p => ({ name: p.name, amount: sums[p.id] || 0 }))
-    .filter(e => e.amount > 0)
-    .sort((a, b) => b.amount - a.amount);
-}
-function renderSharePie(canvasId, legendId, entries, label, size) {
-  const canvas = document.getElementById(canvasId);
-  const legend = document.getElementById(legendId);
-  if (!canvas || !legend) return;
-  const total = entries.reduce((a, e) => a + e.amount, 0);
-  const dpr = window.devicePixelRatio || 1;
-  size = size || 180;
-  canvas.width = size * dpr; canvas.height = size * dpr;
-  const ctx = canvas.getContext('2d');
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, size, size);
-
-  if (total === 0) {
-    ctx.beginPath(); ctx.arc(size/2, size/2, size * 0.39, 0, Math.PI*2);
-    ctx.fillStyle = '#ffe4dc'; ctx.fill();
-    ctx.strokeStyle = '#2a1f3d'; ctx.lineWidth = 2; ctx.stroke();
-    legend.innerHTML = `<div style="color:var(--ink-light);font-size:13px;padding:8px 0;">この期間の${label}入力がまだありません</div>`;
-    return;
-  }
-  // 上位6社＋その他にまとめる
-  const TOP = 6;
-  let slices = entries.slice(0, TOP);
-  if (entries.length > TOP) {
-    const other = entries.slice(TOP).reduce((a, e) => a + e.amount, 0);
-    slices = [...slices, { name: `その他（${entries.length - TOP}社）`, amount: other }];
-  }
-  const cx = size/2, cy = size/2, r = size * 0.42;
-  let start = -Math.PI / 2;
-  slices.forEach((sl, i) => {
-    const ang = (sl.amount / total) * Math.PI * 2;
-    ctx.beginPath(); ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, r, start, start + ang); ctx.closePath();
-    ctx.fillStyle = PIE_COLORS[i % PIE_COLORS.length]; ctx.fill();
-    ctx.strokeStyle = '#2a1f3d'; ctx.lineWidth = 2; ctx.stroke();
-    // 10%以上の扇にだけ％を書く
-    const pct = sl.amount / total * 100;
-    if (pct >= 10) {
-      const mid = start + ang / 2;
-      const tx = cx + Math.cos(mid) * r * 0.62, ty = cy + Math.sin(mid) * r * 0.62;
-      ctx.fillStyle = (i === 0 || i === 4) ? 'white' : '#2a1f3d';
-      ctx.font = 'bold 12px "DM Mono", monospace';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(pct.toFixed(0) + '%', tx, ty);
-    }
-    start += ang;
-  });
-  legend.innerHTML = slices.map((sl, i) => `
-    <div class="share-row">
-      <span class="share-sw" style="background:${PIE_COLORS[i % PIE_COLORS.length]};"></span>
-      <span class="share-name">${escapeHtml(sl.name)}</span>
-      <span class="share-amt">${yen(sl.amount)}</span>
-      <span class="share-pct">${(sl.amount / total * 100).toFixed(1)}%</span>
-    </div>`).join('') +
-    `<div style="font-size:11px;color:var(--ink-light);margin-top:6px;text-align:right;">${label}合計 ${yen(total)}・${entries.length}社</div>`;
-}
-
-// ============== レポート（月次＋年間） ==============
-let reportMode = 'fiscal';
-let reportYear = (new Date()).getFullYear();
-function setReportMode(mode) { reportMode = mode; renderReport(); }
-function changeReportYear(delta) { reportYear += delta; renderReport(); }
-function getReportMonths() {
-  const months = [];
-  for (let i = 0; i < 12; i++) {
-    const d = reportMode === 'fiscal' ? new Date(reportYear, 8 + i, 1) : new Date(reportYear, i, 1);
-    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
-  }
-  return months;
-}
-// 支出の内訳（買掛・給与・固定費・返済）を円グラフ用の配列に
-function expenseEntries(months) {
-  const sum = { purchases: 0, salaries: 0, fixed: 0, loanPay: 0 };
-  months.forEach(ym => { const t = calcMonthTotals(ym); sum.purchases += t.purchases; sum.salaries += t.salaries; sum.fixed += t.fixed; sum.loanPay += t.loanPay; });
-  return [
-    { name: '買掛・外注', amount: sum.purchases },
-    { name: '給与', amount: sum.salaries },
-    { name: '固定費', amount: sum.fixed },
-    { name: '融資返済', amount: sum.loanPay }
-  ].filter(e => e.amount > 0).sort((a, b) => b.amount - a.amount);
-}
-// 「次どうする？」のヒント文を作る
-function buildHint(sales, expense, salesEntries, expEntries, periodLabel) {
-  const lines = [];
-  const profit = sales - expense;
-  if (sales === 0 && expense === 0) return `${periodLabel}はまだ入力がありません。`;
-  const margin = sales > 0 ? (profit / sales * 100) : 0;
-  if (sales > 0) {
-    lines.push(`利益率は <b>${margin.toFixed(1)}%</b>（売上${yen(sales)}に対して利益${profit >= 0 ? '' : '−'}${yen(Math.abs(profit))}）。` +
-      (margin >= 15 ? '余裕のある水準です。' : margin >= 5 ? 'もう少し余裕がほしい水準です。' : margin >= 0 ? 'ギリギリ。支出を見直すか単価交渉を。' : '赤字です。原因を下の内訳で確認を。'));
-  }
-  if (salesEntries.length > 0) {
-    const top = salesEntries[0];
-    const topPct = top.amount / sales * 100;
-    lines.push(`売上の <b>${topPct.toFixed(0)}%</b> が「${escapeHtml(top.name)}」1社。` +
-      (topPct >= 70 ? 'かなり依存度が高いので、2社目・3社目を育てると安心です。' : topPct >= 50 ? '依存度は高め。他の取引先も伸ばせると安定します。' : 'いい感じに分散しています。'));
-  }
-  if (expEntries.length > 0 && expense > 0) {
-    const e = expEntries[0];
-    lines.push(`支出で一番大きいのは「${escapeHtml(e.name)}」で <b>${(e.amount / expense * 100).toFixed(0)}%</b>。ここを削れると一番効きます。`);
-  }
-  return lines.join('<br>');
-}
-function renderReport() {
-  if (!document.getElementById('view-report')) return;
-  // ---- 月次 ----
-  const t = calcMonthTotals(currentYM);
-  document.getElementById('repMonthLabel').textContent = ymLabelLong(currentYM) + 'のレポート';
-  document.getElementById('repMSales').textContent = yen(t.sales);
-  document.getElementById('repMExpense').textContent = yen(t.expense);
-  const mp = t.sales - t.expense;
-  document.getElementById('repMProfit').textContent = (mp < 0 ? '−' : '') + yen(Math.abs(mp));
-  document.getElementById('repMProfitSub').textContent = t.sales > 0 ? `利益率 ${(mp / t.sales * 100).toFixed(1)}%` : '';
-  const mS = collectPartnerTotals([currentYM], 'sales');
-  const mP = collectPartnerTotals([currentYM], 'purchases');
-  const mE = expenseEntries([currentYM]);
-  renderSharePie('repMSalesPie', 'repMSalesPieLegend', mS, '売上', 150);
-  renderSharePie('repMPurchasePie', 'repMPurchasePieLegend', mP, '買掛', 150);
-  renderSharePie('repMExpensePie', 'repMExpensePieLegend', mE, '支出', 150);
-  document.getElementById('repMHint').innerHTML = '💡 ' + buildHint(t.sales, t.expense, mS, mE, 'この月');
-
-  // ---- 年間 ----
-  document.getElementById('repTabFiscal').classList.toggle('active', reportMode === 'fiscal');
-  document.getElementById('repTabCalendar').classList.toggle('active', reportMode === 'calendar');
-  document.getElementById('repYearLabel').textContent = reportMode === 'fiscal' ? `${reportYear}年9月 〜 ${reportYear + 1}年8月` : `${reportYear}年（1〜12月）`;
-  const months = getReportMonths();
-  let yS = 0, yE = 0;
-  const monthTotals = months.map(ym => { const tt = calcMonthTotals(ym); yS += tt.sales; yE += tt.expense; return { ym, sales: tt.sales }; });
-  document.getElementById('repYSales').textContent = yen(yS);
-  document.getElementById('repYExpense').textContent = yen(yE);
-  const yp = yS - yE;
-  document.getElementById('repYProfit').textContent = (yp < 0 ? '−' : '') + yen(Math.abs(yp));
-  document.getElementById('repYProfitSub').textContent = yS > 0 ? `利益率 ${(yp / yS * 100).toFixed(1)}%` : '';
-  const ySE = collectPartnerTotals(months, 'sales');
-  const yPE = collectPartnerTotals(months, 'purchases');
-  const yEE = expenseEntries(months);
-  renderSharePie('repYSalesPie', 'repYSalesPieLegend', ySE, '売上', 150);
-  renderSharePie('repYPurchasePie', 'repYPurchasePieLegend', yPE, '買掛', 150);
-  renderSharePie('repYExpensePie', 'repYExpensePieLegend', yEE, '支出', 150);
-  const maxM = Math.max(...monthTotals.map(m => m.sales), 1);
-  document.getElementById('repMonthBars').innerHTML = monthTotals.map(m => {
-    const [y, mo] = m.ym.split('-');
-    const pct = yS > 0 ? m.sales / yS * 100 : 0;
-    return `<div class="rep-month-row" style="${m.ym === currentYM ? 'background:var(--peach-soft);border-radius:8px;padding-left:6px;padding-right:6px;' : ''}">
-      <span class="mo">${y.slice(2)}/${parseInt(mo)}月</span>
-      <div class="bar-wrap"><div class="bar" style="width:${m.sales / maxM * 100}%;"></div></div>
-      <span class="amt">${yen(m.sales)}</span>
-      <span class="pct">${pct.toFixed(1)}%</span>
-    </div>`;
-  }).join('') + (yS > 0 ? `<div style="font-size:11px;color:var(--ink-light);text-align:right;margin-top:6px;">月平均 ${yen(Math.round(yS / 12))}</div>` : '');
-  document.getElementById('repYHint').innerHTML = '💡 ' + buildHint(yS, yE, ySE, yEE, 'この期間');
-}
-
-// ============== 一覧（記入済みのみ・印刷用） ==============
-function renderListView() {
-  const body = document.getElementById('listBody');
-  if (!body) return;
-  const showSales = document.getElementById('listShowSales').checked;
-  const showPurchase = document.getElementById('listShowPurchase').checked;
-  const showSalary = document.getElementById('listShowSalary').checked;
-  const showFixed = document.getElementById('listShowFixed').checked;
-  const showTax = document.getElementById('listShowTax').checked;
-  const m = getMonthData();
-  const label = ymLabelLong(currentYM);
-  document.getElementById('listMonthLabel').textContent = label + 'の一覧（記入済みのみ）';
-  document.getElementById('listPrintTitle').textContent = label + '　売上・買掛 一覧';
-  const now = new Date();
-  document.getElementById('listPrintMeta').textContent =
-    `印刷日：${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日　｜　金額は税込入力、税抜は10%・1円未満切り捨て`;
-
-  const table = (title, rows, withTax) => {
-    if (rows.length === 0) return '';
-    const sum = rows.reduce((a, r) => a + r.amount, 0);
-    const head = withTax
-      ? '<tr><th>名前</th><th>税込</th><th>税抜</th><th>消費税</th></tr>'
-      : '<tr><th>名前</th><th>金額</th></tr>';
-    const trs = rows.map(r => {
-      if (!withTax) return `<tr><td>${escapeHtml(r.name)}</td><td>${yen(r.amount)}</td></tr>`;
-      const p = taxParts(r.amount);
-      return `<tr><td>${escapeHtml(r.name)}</td><td>${yen(p.included)}</td><td>${yen(p.excluded)}</td><td>${yen(p.tax)}</td></tr>`;
-    }).join('');
-    let foot;
-    if (withTax) {
-      const p = taxParts(sum);
-      foot = `<tr><td>合計</td><td>${yen(p.included)}</td><td>${yen(p.excluded)}</td><td>${yen(p.tax)}</td></tr>`;
-    } else {
-      foot = `<tr><td>合計</td><td>${yen(sum)}</td></tr>`;
-    }
-    return `
-      <div class="list-section-title">${title} <span class="cnt">${rows.length}件</span></div>
-      <table class="list-table"><thead>${head}</thead><tbody>${trs}</tbody><tfoot>${foot}</tfoot></table>`;
-  };
-
-  let html = '';
-  if (showSales) {
-    const rows = sortedPartners().filter(p => (m.sales || {})[p.id] > 0).map(p => ({ name: p.name, amount: m.sales[p.id] }));
-    html += table('売上', rows, showTax);
-  }
-  if (showPurchase) {
-    const rows = sortedPartners().filter(p => (m.purchases || {})[p.id] > 0).map(p => ({ name: p.name, amount: m.purchases[p.id] }));
-    html += table('買掛・支払', rows, showTax);
-  }
-  if (showSalary) {
-    const rows = data.employees.filter(e => (m.salaries || {})[e.id] > 0).map(e => ({ name: e.name, amount: m.salaries[e.id] }));
-    html += table('給与', rows, false);
-  }
-  if (showFixed) {
-    const rows = data.fixed.map(f => ({ name: f.name, amount: getFixedAmountForMonth(f, currentYM) })).filter(r => r.amount > 0);
-    html += table('固定費', rows, showTax);
-  }
-  body.innerHTML = html || '<div class="empty">この月はまだ金額が入力されていません<div class="empty-hint">売上・買掛のページで入力すると、ここに一覧が出ます</div></div>';
-}
-function printListView() {
-  renderListView();
-  window.print();
 }
 
 let pendingDelete = null;
