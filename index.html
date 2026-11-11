@@ -1564,7 +1564,6 @@
         <div class="rep-block"><h4>💖 売上の取引先別シェア</h4><div class="rep-pie"><canvas id="repMSalesPie" width="150" height="150"></canvas><div class="share-legend" id="repMSalesPieLegend"></div></div></div>
         <div class="rep-block"><h4>🌸 買掛の取引先別シェア</h4><div class="rep-pie"><canvas id="repMPurchasePie" width="150" height="150"></canvas><div class="share-legend" id="repMPurchasePieLegend"></div></div></div>
       </div>
-      <div class="rep-hint" id="repMHint"></div>
     </div>
 
     <div class="card">
@@ -1592,7 +1591,6 @@
         <div class="rep-block"><h4>🌸 買掛の取引先別シェア</h4><div class="rep-pie"><canvas id="repYPurchasePie" width="150" height="150"></canvas><div class="share-legend" id="repYPurchasePieLegend"></div></div></div>
         <div class="rep-block" style="grid-column: 1 / -1;"><h4>📅 月ごとの売上（年間に占める割合）</h4><div id="repMonthBars"></div></div>
       </div>
-      <div class="rep-hint" id="repYHint"></div>
     </div>
   </section>
 
@@ -4107,25 +4105,6 @@ function getReportMonths() {
   }
   return months;
 }
-// 「次どうする？」のヒント文を作る
-function buildHint(sales, purchases, salesEntries, purchaseEntries, periodLabel) {
-  const lines = [];
-  if (sales === 0 && purchases === 0) return `${periodLabel}はまだ入力がありません。`;
-  if (sales > 0 && purchases > 0) {
-    lines.push(`売上に対する買掛の割合は <b>${(purchases / sales * 100).toFixed(0)}%</b>（売上${yen(sales)}・買掛${yen(purchases)}）。`);
-  }
-  if (salesEntries.length > 0) {
-    const top = salesEntries[0];
-    const topPct = top.amount / sales * 100;
-    lines.push(`売上の <b>${topPct.toFixed(0)}%</b> が「${escapeHtml(top.name)}」1社。` +
-      (topPct >= 70 ? 'かなり依存度が高いので、2社目・3社目を育てると安心です。' : topPct >= 50 ? '依存度は高め。他の取引先も伸ばせると安定します。' : 'いい感じに分散しています。'));
-  }
-  if (purchaseEntries.length > 0 && purchases > 0) {
-    const e = purchaseEntries[0];
-    lines.push(`買掛で一番大きいのは「${escapeHtml(e.name)}」で <b>${(e.amount / purchases * 100).toFixed(0)}%</b>。単価や発注先を見直すならまずここから。`);
-  }
-  return lines.join('<br>');
-}
 function renderReport() {
   if (!document.getElementById('view-report')) return;
   // ---- 月次 ----
@@ -4137,7 +4116,6 @@ function renderReport() {
   const mP = collectPartnerTotals([currentYM], 'purchases');
   renderSharePie('repMSalesPie', 'repMSalesPieLegend', mS, '売上', 150);
   renderSharePie('repMPurchasePie', 'repMPurchasePieLegend', mP, '買掛', 150);
-  document.getElementById('repMHint').innerHTML = '💡 ' + buildHint(t.sales, t.purchases, mS, mP, 'この月');
 
   // ---- 年間 ----
   document.getElementById('repTabFiscal').classList.toggle('active', reportMode === 'fiscal');
@@ -4163,7 +4141,6 @@ function renderReport() {
       <span class="pct">${pct.toFixed(1)}%</span>
     </div>`;
   }).join('') + (yS > 0 ? `<div style="font-size:11px;color:var(--ink-light);text-align:right;margin-top:6px;">月平均 ${yen(Math.round(yS / 12))}</div>` : '');
-  document.getElementById('repYHint').innerHTML = '💡 ' + buildHint(yS, yE, ySE, yPE, 'この期間');
 }
 
 // レポート印刷：'month' | 'year' | 'both'
