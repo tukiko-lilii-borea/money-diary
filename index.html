@@ -847,6 +847,34 @@
   .share-title { font-family: 'Fraunces', serif; font-style: italic; font-weight: 700; font-size: 15px; margin: 18px 0 0; }
   @media (max-width: 480px) { .share-amt { display: none; } }
 
+  /* ===== レポート ===== */
+  .rep-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .rep-block {
+    background: var(--cream); border: 2px solid var(--ink); border-radius: 16px;
+    padding: 14px; box-shadow: 3px 3px 0 var(--ink);
+  }
+  .rep-block h4 {
+    margin: 0 0 8px; font-family: 'Fraunces', serif; font-style: italic; font-weight: 700;
+    font-size: 15px; display: flex; align-items: center; gap: 6px;
+  }
+  .rep-pie { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .rep-pie canvas { width: 150px; height: 150px; flex-shrink: 0; }
+  .rep-pie .share-legend { min-width: 150px; }
+  .rep-pie .share-name { white-space: normal; line-height: 1.3; }
+  .rep-hint {
+    margin-top: 14px; padding: 12px 14px; background: white;
+    border: 2px dashed var(--line-strong); border-radius: 12px; font-size: 13px; line-height: 1.7;
+  }
+  .rep-hint b { color: var(--blue); }
+  .rep-month-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px dashed var(--line-strong); font-size: 13px; }
+  .rep-month-row:last-child { border-bottom: none; }
+  .rep-month-row .mo { width: 64px; font-weight: 700; }
+  .rep-month-row .bar-wrap { flex: 1; height: 12px; background: white; border: 1.5px solid var(--ink); border-radius: 6px; overflow: hidden; }
+  .rep-month-row .bar { height: 100%; background: var(--blue); }
+  .rep-month-row .pct { font-family: 'DM Mono', monospace; font-weight: 700; width: 50px; text-align: right; }
+  .rep-month-row .amt { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-soft); width: 90px; text-align: right; }
+  @media (max-width: 480px) { .rep-month-row .amt { display: none; } }
+
   /* ===== 一覧（印刷用）ページ ===== */
   .list-controls { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-bottom: 14px; }
   .list-controls label { font-size: 13px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
@@ -1326,6 +1354,7 @@
   <button class="tab" data-view="purchase">🌸 買掛</button>
   <button class="tab" data-view="annual-purchase">📋 年間買掛</button>
   <button class="tab" data-view="list">🖨 一覧</button>
+  <button class="tab" data-view="report">📊 レポート</button>
   <button class="tab" data-view="salary">🎀 給与</button>
   <button class="tab" data-view="loan">🍊 融資</button>
   <button class="tab" data-view="fixed">🫧 固定費</button>
@@ -1497,6 +1526,50 @@
   </section>
 
   <!-- Salary -->
+  <!-- レポート -->
+  <section class="view" id="view-report">
+    <div class="card">
+      <h2 id="repMonthLabel">今月のレポート</h2>
+      <p style="font-size:12px;color:var(--ink-soft);margin:0 0 12px;">✿ 月は上の「‹ ›」で切り替え。どの取引先に偏ってるか、お金がどこに出ていってるかが見えます</p>
+      <div class="dash-grid" style="margin-bottom:14px;">
+        <div class="stat income"><div class="stat-label">売上</div><div class="stat-value num" id="repMSales">¥0</div></div>
+        <div class="stat expense"><div class="stat-label">支出</div><div class="stat-value num" id="repMExpense">¥0</div></div>
+        <div class="stat"><div class="stat-label">利益</div><div class="stat-value num" id="repMProfit">¥0</div><div class="stat-sub" id="repMProfitSub"></div></div>
+      </div>
+      <div class="rep-grid">
+        <div class="rep-block"><h4>💖 売上の取引先別シェア</h4><div class="rep-pie"><canvas id="repMSalesPie" width="150" height="150"></canvas><div class="share-legend" id="repMSalesPieLegend"></div></div></div>
+        <div class="rep-block"><h4>🌸 買掛の取引先別シェア</h4><div class="rep-pie"><canvas id="repMPurchasePie" width="150" height="150"></canvas><div class="share-legend" id="repMPurchasePieLegend"></div></div></div>
+        <div class="rep-block"><h4>💸 支出の内訳</h4><div class="rep-pie"><canvas id="repMExpensePie" width="150" height="150"></canvas><div class="share-legend" id="repMExpensePieLegend"></div></div></div>
+      </div>
+      <div class="rep-hint" id="repMHint"></div>
+    </div>
+
+    <div class="card">
+      <h2>年間のレポート</h2>
+      <div class="input-row" style="gap: 8px; margin-bottom: 4px;">
+        <button class="subtab active" id="repTabFiscal" onclick="setReportMode('fiscal')" style="flex:1; text-align:center;">🏢 事業年度（9月〜8月）</button>
+        <button class="subtab" id="repTabCalendar" onclick="setReportMode('calendar')" style="flex:1; text-align:center;">📆 暦年（1月〜12月）</button>
+      </div>
+      <div class="ym-picker" style="margin: 10px 0; justify-content: center; display: inline-flex;">
+        <button onclick="changeReportYear(-1)">‹</button>
+        <div class="ym-display" id="repYearLabel">-</div>
+        <button onclick="changeReportYear(1)">›</button>
+      </div>
+      <div class="dash-grid" style="margin-bottom:14px;">
+        <div class="stat income"><div class="stat-label">年間売上</div><div class="stat-value num" id="repYSales">¥0</div></div>
+        <div class="stat expense"><div class="stat-label">年間支出</div><div class="stat-value num" id="repYExpense">¥0</div></div>
+        <div class="stat"><div class="stat-label">年間利益</div><div class="stat-value num" id="repYProfit">¥0</div><div class="stat-sub" id="repYProfitSub"></div></div>
+      </div>
+      <div class="rep-grid">
+        <div class="rep-block"><h4>💖 売上の取引先別シェア</h4><div class="rep-pie"><canvas id="repYSalesPie" width="150" height="150"></canvas><div class="share-legend" id="repYSalesPieLegend"></div></div></div>
+        <div class="rep-block"><h4>🌸 買掛の取引先別シェア</h4><div class="rep-pie"><canvas id="repYPurchasePie" width="150" height="150"></canvas><div class="share-legend" id="repYPurchasePieLegend"></div></div></div>
+        <div class="rep-block"><h4>💸 支出の内訳</h4><div class="rep-pie"><canvas id="repYExpensePie" width="150" height="150"></canvas><div class="share-legend" id="repYExpensePieLegend"></div></div></div>
+        <div class="rep-block" style="grid-column: 1 / -1;"><h4>📅 月ごとの売上（年間に占める割合）</h4><div id="repMonthBars"></div></div>
+      </div>
+      <div class="rep-hint" id="repYHint"></div>
+    </div>
+  </section>
+
   <!-- 一覧（印刷用） -->
   <section class="view" id="view-list">
     <div class="card">
@@ -2120,6 +2193,7 @@ function renderAll() {
   renderMonthlyMemo();
   renderMaster();
   renderListView();
+  renderReport();
 }
 
 // ============== ホームウィジェット（今日の予定・タスク・メモ・誕生日）==============
@@ -3938,20 +4012,20 @@ function collectPartnerTotals(months, category) {
     .filter(e => e.amount > 0)
     .sort((a, b) => b.amount - a.amount);
 }
-function renderSharePie(canvasId, legendId, entries, label) {
+function renderSharePie(canvasId, legendId, entries, label, size) {
   const canvas = document.getElementById(canvasId);
   const legend = document.getElementById(legendId);
   if (!canvas || !legend) return;
   const total = entries.reduce((a, e) => a + e.amount, 0);
   const dpr = window.devicePixelRatio || 1;
-  const size = 180;
+  size = size || 180;
   canvas.width = size * dpr; canvas.height = size * dpr;
   const ctx = canvas.getContext('2d');
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, size, size);
 
   if (total === 0) {
-    ctx.beginPath(); ctx.arc(size/2, size/2, 70, 0, Math.PI*2);
+    ctx.beginPath(); ctx.arc(size/2, size/2, size * 0.39, 0, Math.PI*2);
     ctx.fillStyle = '#ffe4dc'; ctx.fill();
     ctx.strokeStyle = '#2a1f3d'; ctx.lineWidth = 2; ctx.stroke();
     legend.innerHTML = `<div style="color:var(--ink-light);font-size:13px;padding:8px 0;">この期間の${label}入力がまだありません</div>`;
@@ -3964,7 +4038,7 @@ function renderSharePie(canvasId, legendId, entries, label) {
     const other = entries.slice(TOP).reduce((a, e) => a + e.amount, 0);
     slices = [...slices, { name: `その他（${entries.length - TOP}社）`, amount: other }];
   }
-  const cx = size/2, cy = size/2, r = 76;
+  const cx = size/2, cy = size/2, r = size * 0.42;
   let start = -Math.PI / 2;
   slices.forEach((sl, i) => {
     const ang = (sl.amount / total) * Math.PI * 2;
@@ -3992,6 +4066,102 @@ function renderSharePie(canvasId, legendId, entries, label) {
       <span class="share-pct">${(sl.amount / total * 100).toFixed(1)}%</span>
     </div>`).join('') +
     `<div style="font-size:11px;color:var(--ink-light);margin-top:6px;text-align:right;">${label}合計 ${yen(total)}・${entries.length}社</div>`;
+}
+
+// ============== レポート（月次＋年間） ==============
+let reportMode = 'fiscal';
+let reportYear = (new Date()).getFullYear();
+function setReportMode(mode) { reportMode = mode; renderReport(); }
+function changeReportYear(delta) { reportYear += delta; renderReport(); }
+function getReportMonths() {
+  const months = [];
+  for (let i = 0; i < 12; i++) {
+    const d = reportMode === 'fiscal' ? new Date(reportYear, 8 + i, 1) : new Date(reportYear, i, 1);
+    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  }
+  return months;
+}
+// 支出の内訳（買掛・給与・固定費・返済）を円グラフ用の配列に
+function expenseEntries(months) {
+  const sum = { purchases: 0, salaries: 0, fixed: 0, loanPay: 0 };
+  months.forEach(ym => { const t = calcMonthTotals(ym); sum.purchases += t.purchases; sum.salaries += t.salaries; sum.fixed += t.fixed; sum.loanPay += t.loanPay; });
+  return [
+    { name: '買掛・外注', amount: sum.purchases },
+    { name: '給与', amount: sum.salaries },
+    { name: '固定費', amount: sum.fixed },
+    { name: '融資返済', amount: sum.loanPay }
+  ].filter(e => e.amount > 0).sort((a, b) => b.amount - a.amount);
+}
+// 「次どうする？」のヒント文を作る
+function buildHint(sales, expense, salesEntries, expEntries, periodLabel) {
+  const lines = [];
+  const profit = sales - expense;
+  if (sales === 0 && expense === 0) return `${periodLabel}はまだ入力がありません。`;
+  const margin = sales > 0 ? (profit / sales * 100) : 0;
+  if (sales > 0) {
+    lines.push(`利益率は <b>${margin.toFixed(1)}%</b>（売上${yen(sales)}に対して利益${profit >= 0 ? '' : '−'}${yen(Math.abs(profit))}）。` +
+      (margin >= 15 ? '余裕のある水準です。' : margin >= 5 ? 'もう少し余裕がほしい水準です。' : margin >= 0 ? 'ギリギリ。支出を見直すか単価交渉を。' : '赤字です。原因を下の内訳で確認を。'));
+  }
+  if (salesEntries.length > 0) {
+    const top = salesEntries[0];
+    const topPct = top.amount / sales * 100;
+    lines.push(`売上の <b>${topPct.toFixed(0)}%</b> が「${escapeHtml(top.name)}」1社。` +
+      (topPct >= 70 ? 'かなり依存度が高いので、2社目・3社目を育てると安心です。' : topPct >= 50 ? '依存度は高め。他の取引先も伸ばせると安定します。' : 'いい感じに分散しています。'));
+  }
+  if (expEntries.length > 0 && expense > 0) {
+    const e = expEntries[0];
+    lines.push(`支出で一番大きいのは「${escapeHtml(e.name)}」で <b>${(e.amount / expense * 100).toFixed(0)}%</b>。ここを削れると一番効きます。`);
+  }
+  return lines.join('<br>');
+}
+function renderReport() {
+  if (!document.getElementById('view-report')) return;
+  // ---- 月次 ----
+  const t = calcMonthTotals(currentYM);
+  document.getElementById('repMonthLabel').textContent = ymLabelLong(currentYM) + 'のレポート';
+  document.getElementById('repMSales').textContent = yen(t.sales);
+  document.getElementById('repMExpense').textContent = yen(t.expense);
+  const mp = t.sales - t.expense;
+  document.getElementById('repMProfit').textContent = (mp < 0 ? '−' : '') + yen(Math.abs(mp));
+  document.getElementById('repMProfitSub').textContent = t.sales > 0 ? `利益率 ${(mp / t.sales * 100).toFixed(1)}%` : '';
+  const mS = collectPartnerTotals([currentYM], 'sales');
+  const mP = collectPartnerTotals([currentYM], 'purchases');
+  const mE = expenseEntries([currentYM]);
+  renderSharePie('repMSalesPie', 'repMSalesPieLegend', mS, '売上', 150);
+  renderSharePie('repMPurchasePie', 'repMPurchasePieLegend', mP, '買掛', 150);
+  renderSharePie('repMExpensePie', 'repMExpensePieLegend', mE, '支出', 150);
+  document.getElementById('repMHint').innerHTML = '💡 ' + buildHint(t.sales, t.expense, mS, mE, 'この月');
+
+  // ---- 年間 ----
+  document.getElementById('repTabFiscal').classList.toggle('active', reportMode === 'fiscal');
+  document.getElementById('repTabCalendar').classList.toggle('active', reportMode === 'calendar');
+  document.getElementById('repYearLabel').textContent = reportMode === 'fiscal' ? `${reportYear}年9月 〜 ${reportYear + 1}年8月` : `${reportYear}年（1〜12月）`;
+  const months = getReportMonths();
+  let yS = 0, yE = 0;
+  const monthTotals = months.map(ym => { const tt = calcMonthTotals(ym); yS += tt.sales; yE += tt.expense; return { ym, sales: tt.sales }; });
+  document.getElementById('repYSales').textContent = yen(yS);
+  document.getElementById('repYExpense').textContent = yen(yE);
+  const yp = yS - yE;
+  document.getElementById('repYProfit').textContent = (yp < 0 ? '−' : '') + yen(Math.abs(yp));
+  document.getElementById('repYProfitSub').textContent = yS > 0 ? `利益率 ${(yp / yS * 100).toFixed(1)}%` : '';
+  const ySE = collectPartnerTotals(months, 'sales');
+  const yPE = collectPartnerTotals(months, 'purchases');
+  const yEE = expenseEntries(months);
+  renderSharePie('repYSalesPie', 'repYSalesPieLegend', ySE, '売上', 150);
+  renderSharePie('repYPurchasePie', 'repYPurchasePieLegend', yPE, '買掛', 150);
+  renderSharePie('repYExpensePie', 'repYExpensePieLegend', yEE, '支出', 150);
+  const maxM = Math.max(...monthTotals.map(m => m.sales), 1);
+  document.getElementById('repMonthBars').innerHTML = monthTotals.map(m => {
+    const [y, mo] = m.ym.split('-');
+    const pct = yS > 0 ? m.sales / yS * 100 : 0;
+    return `<div class="rep-month-row" style="${m.ym === currentYM ? 'background:var(--peach-soft);border-radius:8px;padding-left:6px;padding-right:6px;' : ''}">
+      <span class="mo">${y.slice(2)}/${parseInt(mo)}月</span>
+      <div class="bar-wrap"><div class="bar" style="width:${m.sales / maxM * 100}%;"></div></div>
+      <span class="amt">${yen(m.sales)}</span>
+      <span class="pct">${pct.toFixed(1)}%</span>
+    </div>`;
+  }).join('') + (yS > 0 ? `<div style="font-size:11px;color:var(--ink-light);text-align:right;margin-top:6px;">月平均 ${yen(Math.round(yS / 12))}</div>` : '');
+  document.getElementById('repYHint').innerHTML = '💡 ' + buildHint(yS, yE, ySE, yEE, 'この期間');
 }
 
 // ============== 一覧（記入済みのみ・印刷用） ==============
