@@ -797,6 +797,8 @@
 
   /* ===== 金額入力（カンマ付きテキスト欄） ===== */
   input.amt { font-family: 'DM Mono', monospace; text-align: right; font-variant-numeric: tabular-nums; }
+  .entry-amount.has-prev::placeholder { color: #b9a6c9; font-size: 11px; opacity: 1; letter-spacing: -0.3px; }
+  .entry-amount.has-prev { border-style: dashed; }
 
   /* ===== 各行の税抜表示 ===== */
   .entry-amount-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
@@ -1479,7 +1481,7 @@
     <div class="card">
       <h2 id="salesMonthLabel">今月の売上</h2>
       <div class="gojuon-bar" id="salesGojuonBar"></div>
-      <p style="font-size:12px;color:var(--ink-soft);margin:0 0 4px;">✿ 金額は<strong>税込</strong>で入力。下に税抜（10%・切り捨て）を自動表示します</p>
+      <p style="font-size:12px;color:var(--ink-soft);margin:0 0 4px;">✿ 金額は<strong>税込</strong>で入力。下に税抜（10%・切り捨て）を自動表示します。点線の欄＝前月は入力あり・今月まだ</p>
       <div id="salesList" class="entry-list"></div>
       <div class="total-row"><div class="name">Total ♡</div><div class="val" id="salesTotal">¥0</div></div>
       <div class="tax-breakdown" id="salesTaxBreak"></div>
@@ -1515,7 +1517,7 @@
     <div class="card">
       <h2 id="purchaseMonthLabel">今月の買掛・支払</h2>
       <div class="gojuon-bar" id="purchaseGojuonBar"></div>
-      <p style="font-size:12px;color:var(--ink-soft);margin:0 0 4px;">✿ 金額は<strong>税込</strong>で入力。下に税抜（10%・切り捨て）を自動表示します</p>
+      <p style="font-size:12px;color:var(--ink-soft);margin:0 0 4px;">✿ 金額は<strong>税込</strong>で入力。下に税抜（10%・切り捨て）を自動表示します。点線の欄＝前月は入力あり・今月まだ</p>
       <div id="purchaseList" class="entry-list"></div>
       <div class="total-row"><div class="name">Total ♡</div><div class="val" id="purchaseTotal">¥0</div></div>
       <div class="tax-breakdown" id="purchaseTaxBreak"></div>
@@ -1971,6 +1973,19 @@ function changeMonth(delta) {
   document.getElementById('ymDisplay').textContent = ymLabel(currentYM);
   renderAll();
 }
+// 前月の同じ項目の金額（未入力の欄にうっすら出す用）
+function prevMonthAmount(category, id) {
+  const [y, m] = currentYM.split('-').map(Number);
+  const d = new Date(y, m - 2, 1);
+  const prevYM = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  const pm = data.monthly[prevYM];
+  return pm && pm[category] ? (pm[category][id] || 0) : 0;
+}
+// 未入力の欄に出すプレースホルダー（前月あり → "前月 1,100,000"）
+function prevPlaceholder(category, id) {
+  const v = prevMonthAmount(category, id);
+  return v ? `前月 ${formatJP(v)}` : '0';
+}
 function getMonthData() {
   if (!data.monthly[currentYM]) {
     data.monthly[currentYM] = { sales: {}, purchases: {}, salaries: {}, fixedOverrides: {}, memoText: '', memoDrawing: '' };
@@ -2196,6 +2211,9 @@ function updateEntry(category, id, val) {
   }
   saveData();
   refreshTaxSub(category, id);
+  if (typeof event !== 'undefined' && event && event.target && event.target.classList) {
+    event.target.classList.toggle('has-prev', amount === 0 && prevMonthAmount(category, id) > 0);
+  }
   if (category === 'sales') renderSalesTotal();
   if (category === 'purchases') renderPurchaseTotal();
   if (category === 'salaries') renderSalaryTotal();
@@ -2798,8 +2816,8 @@ function renderSales() {
       <div class="entry-item">
         <div class="entry-name entry-name-link" onclick="openPartnerLedger('${c.id}')">${escapeHtml(c.name)} <span style="font-size:11px;color:var(--blue-bright);">▸</span></div>
         <div class="entry-amount-wrap">
-          <input type="text" inputmode="numeric" class="entry-amount amt"
-                 value="${fmtAmt(m.sales[c.id])}" placeholder="0"
+          <input type="text" inputmode="numeric" class="entry-amount amt ${!m.sales[c.id] && prevMonthAmount('sales', c.id) ? 'has-prev' : ''}"
+                 value="${fmtAmt(m.sales[c.id])}" placeholder="${prevPlaceholder('sales', c.id)}"
                  onchange="updateEntry('sales', '${c.id}', this.value)">
           <div class="entry-tax-sub" id="taxsub-sales-${c.id}">${taxSubHtml(m.sales[c.id])}</div>
         </div>
@@ -2827,8 +2845,8 @@ function renderPurchase() {
       <div class="entry-item">
         <div class="entry-name entry-name-link" onclick="openPartnerLedger('${s.id}')">${escapeHtml(s.name)} <span style="font-size:11px;color:var(--blue-bright);">▸</span></div>
         <div class="entry-amount-wrap">
-          <input type="text" inputmode="numeric" class="entry-amount amt"
-                 value="${fmtAmt(m.purchases[s.id])}" placeholder="0"
+          <input type="text" inputmode="numeric" class="entry-amount amt ${!m.purchases[s.id] && prevMonthAmount('purchases', s.id) ? 'has-prev' : ''}"
+                 value="${fmtAmt(m.purchases[s.id])}" placeholder="${prevPlaceholder('purchases', s.id)}"
                  onchange="updateEntry('purchases', '${s.id}', this.value)">
           <div class="entry-tax-sub" id="taxsub-purchases-${s.id}">${taxSubHtml(m.purchases[s.id])}</div>
         </div>
@@ -2855,8 +2873,8 @@ function renderSalary() {
       <div class="entry-item">
         <div class="entry-name">${escapeHtml(e.name)}</div>
         <button class="btn-detail btn-sm" onclick="openEmployeeDetail('${e.id}')">👤</button>
-        <input type="text" inputmode="numeric" class="entry-amount amt"
-               value="${fmtAmt(m.salaries[e.id])}" placeholder="0"
+        <input type="text" inputmode="numeric" class="entry-amount amt ${!m.salaries[e.id] && prevMonthAmount('salaries', e.id) ? 'has-prev' : ''}"
+               value="${fmtAmt(m.salaries[e.id])}" placeholder="${prevPlaceholder('salaries', e.id)}"
                onchange="updateEntry('salaries', '${e.id}', this.value)">
       </div>
     `).join('');
